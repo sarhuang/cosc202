@@ -2,7 +2,8 @@
  * Name: Sarah Huang
  * Date: 8/28/21
  * Program: checkerboard.cpp
- * Purpose:
+ * Purpose: Prints (R * C) grid starting from given char to end of cycle char.
+ *			Using width, each char of grid is printed as (W * W) square.
  */
 
 
@@ -22,40 +23,33 @@ int main(){
 
 	
 
-	//Asking for input, all in one line
-	// Exit silently if any of the parameters is less than or equal to zero, 
-	// and if the ASCII value of the starting character plus the cycle size is greater than 127.
-	
-	
+	/* Asking for input, all in one line
+	 * Print error if only one parameter */
 	
 	cin >> r;
-	if(cin.get() == '\n'){	
+	if(cin.get() != '\n'){	
+		cin >> c;
+		cin >> sc;
+		cin >> cs;
+		cin >> w;
+	}
+	else{
 		cerr << "usage: checkerboard  - stdin should contain R, C, SC, CS and W" << endl;
 		return 1;
 	}
-	else{
-	
-
-
-	
-	//cin >> r;
-	cin >> c;
-	cin >> sc;
-	cin >> cs;
-	cin >> w;
-	
-	}
 		
 
+	//Exits silently if parameter <=0 and ASCII value of sc + cs > 127
+	
 	if(r > 0 && c > 0 && sc > 0 && cs > 0 && w > 0){
 		if((sc + cs) <= 127){
-
-
 			firstChar = sc;
-			//lastChar = sc + (r+c) % cs;
 			lastChar = sc + (cs - 1);
-			//cout << "lastchar: " << lastChar << endl;
+			
 
+			/* Print each char w times, update char to next one (reset back to original after cycle size)
+			 * Repeat loop repeats the previous row to make it (width * width)
+			 * sc updates to start next char repeat loop/(w*w) and firstChar keeps original input char */
 		
 			for(int numRow = 0; numRow < r; numRow++){	
 				currentChar = sc;
@@ -71,7 +65,6 @@ int main(){
 							currentChar = firstChar;
 						else
 							currentChar += 1;
-			
 					}
 					cout << endl;
 					currentChar = sc;
@@ -84,7 +77,6 @@ int main(){
 			}	
 		}
 	}
-
 
 	return 0;
 }
