@@ -24,16 +24,9 @@ int main(){
 	
 
 	/* Asking for input, all in one line
-	 * Print error if only one parameter */
+	 * Print error if not enough parameters */
 	
-	cin >> r;
-	if(cin.get() != '\n'){	
-		cin >> c;
-		cin >> sc;
-		cin >> cs;
-		cin >> w;
-	}
-	else{
+	if(!(cin >> r && cin >> c && cin >> sc && cin >> cs && cin >> w)){
 		cerr << "usage: checkerboard  - stdin should contain R, C, SC, CS and W" << endl;
 		return 1;
 	}
