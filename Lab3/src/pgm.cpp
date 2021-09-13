@@ -1,5 +1,6 @@
 #include "pgm.hpp"
 
+
 #include <cstdio>
 #include <cstdlib>
 #include <string>
@@ -176,7 +177,7 @@ bool Pgm::Pad(size_t w, size_t pv){
 	(void) w;
 	(void) pv;
 
-	if(Pixels.size() == 0)
+	if(Pixels.size() == 0 || pv >= 255)
 		return false;
 
 	size_t oldRow = Pixels.size();
@@ -184,65 +185,62 @@ bool Pgm::Pad(size_t w, size_t pv){
 	size_t newRow = oldRow + 2*w;
 	size_t newCol = oldCol + 2*w;
 	vector <vector <int> > temp = Pixels;
-	bool prev2_pv = false;
-	bool next2_0 = false;
-	//size_t i, j, m, n;
-	
+	bool prev_pv = false;
+	bool next_0 = false;
+	//int counter = 0;
+		
 	Pixels = vector < vector <int> > (newRow, vector<int> (newCol));
 
 	
 	
 	for(unsigned int i = 0; i < newRow; i++){
-		//cout << "Row " << i << endl;
-		
 		for(unsigned int j = 0; j < newCol; j++){
-			
+
 			if(i == w && j == w){
 				for(unsigned int m = w; m < w + oldRow; m++){
 					for(unsigned int n = w; n < w + oldCol; n++){
-						Pixels[m][n] = temp[m-w][n-w];	
+						Pixels[m][n] = temp[m-w][n-w];
 					}
+					
+					for(unsigned int b = 0; b < w; b++){
+						Pixels[m][b + w + oldCol] = pv;
+					}
+
+					//for(unsigned int b = 1; b >= 2; b++){
+						for(unsigned int c = 0; c < w; c++){
+							Pixels[m+1][c] = pv;
+						}
+					//}
 				}
 			}
-			else if(Pixels[i][j] == 0){
-				next2_0 = (j < (newCol-2) && Pixels[i][j+1] == 0 && Pixels[i][j+2] == 0);
-				prev2_pv = (j >= 2 && (unsigned int)Pixels[i][j-1] == pv && (unsigned int)Pixels[i][j-2] == pv);
-					
-				if(prev2_pv || next2_0)
+			
+			else if(Pixels[i][j] == 0 /*&& (i <= w || i >= w+oldRow)*/){
+				next_0 = (j < (newCol-2) && Pixels[i][j+1] == 0 && Pixels[i][j+2] == 0);
+				prev_pv = (j >= 2 && (unsigned int)Pixels[i][j-1] == pv && (unsigned int)Pixels[i][j-2] == pv);
+				
+				
+				if(next_0 && prev_pv){
+					Pixels[i][j] = pv;
+				}
+
+				//< w+1
+				else if(i < w || i >= newRow-w){
 					Pixels[i][j] = pv;
 
-					
-				/*
-				if(prev2_pv && next2_0)
-					Pixels[i][j] = pv;	
+				}
 				
-				else if(j < 2 && next2_0)
-					Pixels[i][j] = pv;
-				
-				else if(j >= (newCol-2) && prev2_pv)
-					Pixels[i][j] = pv;
-				*/
-
-				//prev2_pv = false;
-				//next2_0 = false;
+				else if(i == w){
+					for(unsigned int d = 0; d < w; d++){
+						Pixels[i][d] = pv;
+					}
+				}				
 			}
-				
-			//cout << "Pixels[" << i << "][" << j << "] = " << Pixels[i][j] << endl;
-			//cout << "temp[" << i << "][" << j << "] = " << temp[i][j] << endl << endl;
 		}
 	}
 	return true;
 }
 
-//Pad(1, 0) --> newRow = oldRow + 2*width
-//2 x 3  --> 4 x 5
-//				0 0 0 0 0
-//1 2 3	 -->	0 1 2 3 0
-//4 5 6			0 4 5 6 0
-//				0 0 0 0 0
-//
-//i=1 j=1 i<col-1 j<row-1
-//------------------------------------------
+
 
 
 bool Pgm::Panel(size_t r, size_t c){
@@ -251,13 +249,24 @@ bool Pgm::Panel(size_t r, size_t c){
 
 	if(Pixels.size() == 0)
 		return false;
-
-	//size_t newRow = r * Pixels.size();
-	//size_t newCol = c * Pixels[0].size();
 	
+	size_t newRow = r * Pixels.size();
+	size_t newCol = c * Pixels[0].size();
 	
+	vector <vector <int> > temp = Pixels;
+	Pixels = vector <vector <int> > (newRow, vector<int> (newCol));
 
-	return false;
+	for(unsigned int i = 0; i < newRow; i++){
+		for(unsigned int j = 0; j < newCol; j++){
+			Pixels[i][j] = temp[i % temp.size()][j % temp[0].size()];
+			//cout << "Pixels[" << i << "][" << j << "] = " << Pixels[i][j] << endl;
+			//cout << "temp[" << (i % temp.size()) << "][" << (j % temp[0].size()) << "] = " << temp[i%temp.size()][j%temp[0].size()] << endl;
+			//cout << "---------------------------------" << endl;
+
+		}
+	}
+	
+	return true;
 }
 
 
@@ -276,12 +285,32 @@ bool Pgm::Panel(size_t r, size_t c){
 
 
 bool Pgm::Crop(size_t r, size_t c, size_t rows, size_t cols){
-	(void) r;
-	(void) c;
-	(void) rows;
-	(void) cols;
+	(void) r;		//Starting row position
+	(void) c;		//Starting col position
+	(void) rows;	//New row size
+	(void) cols;	//New col size
 
-	return false;
+	if(Pixels.size() == 0)
+		return false;
+
+	cout << Pixels.size() << " vs " << rows << endl;
+	cout << Pixels[0].size() << " vs " << cols << endl;
+
+	if(Pixels.size() < rows || Pixels[0].size() < cols)
+		return false;
+
+	vector <vector <int> > temp = Pixels;
+	Pixels = vector <vector <int> > (rows, vector<int> (cols));
+
+	
+	for(unsigned int i = 0; i < rows; i++){
+		for(unsigned int j = 0; j < cols; j++){
+			Pixels[i][j] = temp[r][c];
+		}
+	}
+	
+
+	return true;
 }
 
 
