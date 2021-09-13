@@ -147,6 +147,7 @@ bool Pgm::Clockwise(){
 		}
 		//cout << "exit the j loop" << endl;
 	}
+	//cout << "After CW, Pixels.size() = " << Pixels.size() << " and Pixels[0].size() = " << Pixels[0].size() << endl;
 	return true;
 }
 
@@ -167,7 +168,8 @@ bool Pgm::Cclockwise(){
 	for(unsigned int i = 0; i < rows; i++){
 		for(unsigned int j = 0; j < cols; j++)
 			Pixels[cols-1-j][i] = temp[i][j];
-	}	
+	}
+	//cout << "After CCW, Pixels.size() = "<< Pixels.size() << " and Pixels[0].size() = " << Pixels[0].size() << endl;
 	return true;
 }
 
@@ -237,6 +239,7 @@ bool Pgm::Pad(size_t w, size_t pv){
 			}
 		}
 	}
+	//cout << "After Pad, Pixels.size() = " << Pixels.size() << " and Pixels[0].size() = " << Pixels[0].size() << endl;
 	return true;
 }
 
@@ -247,7 +250,7 @@ bool Pgm::Panel(size_t r, size_t c){
 	(void) r;
 	(void) c;
 
-	if(Pixels.size() == 0)
+	if(Pixels.size() == 0 || r == 0 || c == 0)
 		return false;
 	
 	size_t newRow = r * Pixels.size();
@@ -265,7 +268,7 @@ bool Pgm::Panel(size_t r, size_t c){
 
 		}
 	}
-	
+	//cout << "After Panel, Pixels.size() = " << Pixels.size() << " and Pixels[0].size = " << Pixels[0].size() << endl;
 	return true;
 }
 
@@ -293,23 +296,23 @@ bool Pgm::Crop(size_t r, size_t c, size_t rows, size_t cols){
 	if(Pixels.size() == 0)
 		return false;
 
-	cout << Pixels.size() << " vs " << rows << endl;
-	cout << Pixels[0].size() << " vs " << cols << endl;
+	//cout << Pixels.size() << " vs " << rows << endl;
+	//cout << Pixels[0].size() << " vs " << cols << endl;
 
-	if(Pixels.size() < rows || Pixels[0].size() < cols)
+	if(Pixels.size() < (r+rows) || Pixels[0].size() < (c+cols))
 		return false;
 
 	vector <vector <int> > temp = Pixels;
 	Pixels = vector <vector <int> > (rows, vector<int> (cols));
 
 	
-	for(unsigned int i = 0; i < rows; i++){
-		for(unsigned int j = 0; j < cols; j++){
-			Pixels[i][j] = temp[r][c];
+	for(unsigned int i = 0; i < Pixels.size(); i++){
+		for(unsigned int j = 0; j < Pixels[0].size(); j++){
+			Pixels[i][j] = temp[r+i][c+j];
 		}
 	}
 	
-
+	//cout << "After Crop, Pixels.size() = " << Pixels.size() << " and Pixels[0].size() = " << Pixels[0].size() << endl;
 	return true;
 }
 
