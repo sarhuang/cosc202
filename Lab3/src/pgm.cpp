@@ -1,5 +1,11 @@
-#include "pgm.hpp"
+/* Name: Sarah Huang
+ * Date: 9/12/21
+ * Program: pgm.cpp
+ * Purpose: Implement methods that read, write, and manipulate a pgm file.
+ */
 
+
+#include "pgm.hpp"
 
 #include <cstdio>
 #include <cstdlib>
@@ -10,11 +16,17 @@
 #include <fstream>
 using namespace std;
 
+
+/* (ALREADY WRITTEN FOR YOU)
+ * Reads in a pgm file with file name as input.
+ * If the pgm file doesn't have the specific row, col, and 255, it fails to read it.
+ * Resizes the Pixels matrix and stores the pixel values in there. */
+
 bool Pgm::Read(const std::string &file)
 {
-  ifstream fin;
-  string s;
-  size_t i, j, r, c, v;
+  ifstream fin;				//Input file stream
+  string s;					//String placeholder to read "P2"	
+  size_t i, j, r, c, v;		//Placeholders, row, col, pixel value
 
   fin.open(file.c_str());
   if (fin.fail()) return false;
@@ -39,80 +51,70 @@ bool Pgm::Read(const std::string &file)
 }
 
 
+
+
+/* Writes a new pgm file using the given file name & row, col, and pixel values from Pixels matrix.
+ *
+ * Specific format:
+ *	 - P2 on its own line, no spaces.
+ *	 - cols rows on the next line, separated by a space, no additional spaces
+ *	 - 255 on its own line, no spaces.
+ *	 - Then the pixels: 20 pixels per line, one space between pixels, no additional spaces.
+ *	 - You don't print additional newlines at the end of each row of pixels -- just start the next row of pixels.
+ *   - The last line is the only one that can have fewer than 20 pixels. 
+ *
+ * ERROR if the Pixels matrix is completely empty (or if we can't write the file for some reason) */  
+
 bool Pgm::Write(const std::string &file) const{
-	(void) file; //do this for every new function without warnings/errors
-	ofstream ofs;
-	int numColumns = 0;
-	int pixelValue = 0;
-	int totalPixels = 0;
+	(void) file;				//User input - file name
+	ofstream ofs;				//Output file stream
+	size_t pixelValue = 0;		//Value of the pixel
+	size_t totalPixels = 0;		//Total number of pixels in pgm file
 
 	ofs.open(file.c_str());
 
-	if(!ofs)
+	if(!ofs || Pixels.size() == 0)
 		return false;
-
-
-	if(Pixels.size() == 0)
-		return false;
-
 	
 	pixelValue = Pixels[0][0];
-	numColumns = Pixels[0].size();
-	totalPixels = Pixels.size() * numColumns;
-	
+	totalPixels = Pixels.size() * Pixels[0].size();
 	
 	ofs << "P2" << endl;
-	ofs << numColumns << " " << Pixels.size() << endl;	//CHANGE TO OFS
+	ofs << Pixels[0].size() << " " << Pixels.size() << endl;
 	ofs << 255 << endl;
 
-
-	
-	for(int k = 1; k < totalPixels; k++){
-		if(k % 20 != 0){
-			//if(k == totalPixels)
-			//	ofs << pixelValue << "\n";
-			//else
-				ofs << pixelValue << " ";
-		}
+	for(size_t i = 1; i < totalPixels; i++){
+		if(i % 20 != 0)
+			ofs << pixelValue << " ";
 		else
 			ofs << pixelValue << "\n";
 		
-		pixelValue = Pixels[k / Pixels[0].size()][k % Pixels[0].size()];
-		
-		
-		//cout << "k = " << k << " and Pixels.size() = " << Pixels.size() << endl;
-		//cout << "[" << k/Pixels[0].size() << "] [" << k%Pixels[0].size() << "]" << endl;
+		pixelValue = Pixels[i / Pixels[0].size()][i % Pixels[0].size()];
 	}
 	ofs << pixelValue << "\n";
-	
-
-	/*
-	for(unsigned int i = 0; i < Pixels.size(); i++){
-		for(unsigned int j = 0; j < Pixles[0].size(); j++){
-			pixelValue = Pixels[i][j];
-			
-			if( (i+j)
-		}
-	}*/
-	
 	ofs.close();
 	return true;
 }
 
 
+
+
+/* Resizes the Pixels matrix wit the given row and column & set the pixel value (will be all the same).
+ * ERROR if the row is 0, col is 0, or the pixel value is over 255 (non-existent) */
+
 bool Pgm::Create(size_t r, size_t c, size_t pv){
-	(void) r;	//number of rows
-	(void) c;	//number of columns
-	(void) pv;	//pixel value
+	(void) r;	//Row size
+	(void) c;	//Column size
+	(void) pv;	//Pixel value
+
 
 	if(c == 0 || r == 0 || pv > 255)
 		return false;
 
-
 	Pixels.resize(r, vector<int>(c, 0));
 	
-	for(unsigned int i = 0; i < Pixels.size(); i++){
-		for(unsigned int j = 0; j < Pixels[i].size(); j++){
+	for(size_t i = 0; i < Pixels.size(); i++){
+		for(size_t j = 0; j < Pixels[i].size(); j++){
 			Pixels[i][j] = pv;
 		}
 	}
@@ -121,217 +123,176 @@ bool Pgm::Create(size_t r, size_t c, size_t pv){
 
 
 
+
+/* Rotates the pgm file clockwise by 90 degrees.
+ * ERROR if the Pixels matrix is empty. */
+
 bool Pgm::Clockwise(){
-	size_t row = Pixels.size();
-	size_t col = 0;
-	vector <vector <int> > temp = Pixels;
+	size_t row = Pixels.size();				//Original row size
+	size_t col = Pixels[0].size();			//Original column size
+	vector <vector <int> > temp = Pixels;	//Placeholder for original Pixels matrix
 
 	if(Pixels.size() == 0)
 		return false;
 	
-	col = Pixels[0].size();
-
-	
-	//cout << "row1 = " << Pixels.size() << " col1 = " << Pixels[0].size() << endl;	//216 277
-	
+	//Resize Pixels vector
 	Pixels = vector <vector <int> > (col, vector<int>(row));
 
-	//cout << "row2 = " << Pixels.size() << " col2 = " << Pixels[5].size() << endl;	//277 277
-	//cout << "but variable row = " << row << " variable col = " << col << endl;		//216 277
-
-
-	for(unsigned int i = 0; i < row; i++){
-		for(unsigned int j = 0; j < col; j++){
+	for(size_t i = 0; i < row; i++){
+		for(size_t j = 0; j < col; j++){
 			Pixels[j][row-1-i] = temp[i][j];
-			//cout << "[j][row-1-i] = " << j << " " << row-1-i << " = " << temp[i][j] << endl;
 		}
-		//cout << "exit the j loop" << endl;
 	}
-	//cout << "After CW, Pixels.size() = " << Pixels.size() << " and Pixels[0].size() = " << Pixels[0].size() << endl;
 	return true;
 }
 
 
 
+
+/* Rotates the pgm file counterclockwise by 90 degrees.
+ * ERROR if the Pixels matrix is empty. */
+
 bool Pgm::Cclockwise(){
-	size_t rows = Pixels.size();
-	size_t cols = 0;
-	vector <vector <int> > temp = Pixels;
+	size_t row = Pixels.size();				//Original row size
+	size_t col = Pixels[0].size();			//Original column size
+	vector <vector <int> > temp = Pixels;	//Placeholder for original Pixels matrix
 
 	if(Pixels.size() == 0)
 		return false;
+	
 
-	cols = Pixels[0].size();
+	Pixels = vector <vector <int> > (col, vector<int> (row));
 
-	Pixels = vector <vector <int> > (cols, vector<int> (rows));
-
-	for(unsigned int i = 0; i < rows; i++){
-		for(unsigned int j = 0; j < cols; j++)
-			Pixels[cols-1-j][i] = temp[i][j];
+	for(unsigned int i = 0; i < row; i++){
+		for(unsigned int j = 0; j < col; j++)
+			Pixels[col-1-j][i] = temp[i][j];	//Identical to Clockwise but swapped
 	}
-	//cout << "After CCW, Pixels.size() = "<< Pixels.size() << " and Pixels[0].size() = " << Pixels[0].size() << endl;
 	return true;
 }
 
 
 
+
+/* Add a border of w pixels with the given value.
+ * Checks through every pixel - that's why there's multiple checks and for loops
+ * ERROR if Pixels matrix is empty*/
 bool Pgm::Pad(size_t w, size_t pv){
-	(void) w;
-	(void) pv;
+	(void) w;								//Width = How much padding
+	(void) pv;								//Pixel value
 
 	if(Pixels.size() == 0 || pv >= 255)
 		return false;
 
-	size_t oldRow = Pixels.size();
-	size_t oldCol = Pixels[0].size();
-	size_t newRow = oldRow + 2*w;
-	size_t newCol = oldCol + 2*w;
-	vector <vector <int> > temp = Pixels;
-	bool prev_pv = false;
-	bool next_0 = false;
-	//int counter = 0;
+	size_t oldRow = Pixels.size();			//Original row size
+	size_t oldCol = Pixels[0].size();		//Original column size
+	size_t newRow = oldRow + 2*w;			//New row size
+	size_t newCol = oldCol + 2*w;			//New column size
+	vector <vector <int> > temp = Pixels;	//Placeholder for original Pixels matrix
+	bool prev_pv = false;					//True if last two elements equal pv
+	bool next_0 = false;					//True if next two elements equal 0
+	
 		
 	Pixels = vector < vector <int> > (newRow, vector<int> (newCol));
 
-	
-	
+
 	for(unsigned int i = 0; i < newRow; i++){
 		for(unsigned int j = 0; j < newCol; j++){
 
+			//At i==w and j==w, the top left corner of the original matrix is there, not padding.
 			if(i == w && j == w){
-				for(unsigned int m = w; m < w + oldRow; m++){
-					for(unsigned int n = w; n < w + oldCol; n++){
-						Pixels[m][n] = temp[m-w][n-w];
+				for(size_t a = w; a < w + oldRow; a++){
+
+					//Copy original matrix values to resized matrix
+					for(size_t b = w; b < w + oldCol; b++){
+						Pixels[a][b] = temp[a-w][b-w];
 					}
 					
-					for(unsigned int b = 0; b < w; b++){
-						Pixels[m][b + w + oldCol] = pv;
+					//Padding in current row
+					for(size_t c = 0; c < w; c++){
+						Pixels[a][c + w + oldCol] = pv;
 					}
-
-					//for(unsigned int b = 1; b >= 2; b++){
-						for(unsigned int c = 0; c < w; c++){
-							Pixels[m+1][c] = pv;
-						}
-					//}
+					
+					//Padding before the next copy of values in the next row
+					for(size_t d = 0; d < w; d++){
+						Pixels[a+1][d] = pv;
+					}
 				}
 			}
 			
-			else if(Pixels[i][j] == 0 /*&& (i <= w || i >= w+oldRow)*/){
+			else if(Pixels[i][j] == 0){
 				next_0 = (j < (newCol-2) && Pixels[i][j+1] == 0 && Pixels[i][j+2] == 0);
 				prev_pv = (j >= 2 && (unsigned int)Pixels[i][j-1] == pv && (unsigned int)Pixels[i][j-2] == pv);
 				
-				
-				if(next_0 && prev_pv){
-					Pixels[i][j] = pv;
-				}
-
-				//< w+1
-				else if(i < w || i >= newRow-w){
+				//Ex. 188 188 _ 0 0  --> definetly padding 
+				if(next_0 && prev_pv)
 					Pixels[i][j] = pv;
 
-				}
+				//Padding way before and after original matrix
+				else if(i < w || i >= newRow-w)
+					Pixels[i][j] = pv;
 				
+				//Padding right before original matrix
 				else if(i == w){
-					for(unsigned int d = 0; d < w; d++){
-						Pixels[i][d] = pv;
+					for(size_t e = 0; e < w; e++){
+						Pixels[i][e] = pv;
 					}
 				}				
 			}
 		}
 	}
-	//cout << "After Pad, Pixels.size() = " << Pixels.size() << " and Pixels[0].size() = " << Pixels[0].size() << endl;
 	return true;
 }
 
 
 
 
+/* Makes multiple copies of the original Pixels matrix and stores them in the resized matrix.
+ * ERROR if the Pixels matrix is empty, the row is 0, or the column is 0. */
+
 bool Pgm::Panel(size_t r, size_t c){
-	(void) r;
-	(void) c;
+	(void) r;								//Row multiplier
+	(void) c;								//Column multiplier
 
 	if(Pixels.size() == 0 || r == 0 || c == 0)
 		return false;
 	
-	size_t newRow = r * Pixels.size();
-	size_t newCol = c * Pixels[0].size();
-	
-	vector <vector <int> > temp = Pixels;
+	size_t newRow = r * Pixels.size();		//New row size
+	size_t newCol = c * Pixels[0].size();	//New column size
+	vector <vector <int> > temp = Pixels;	//Placeholder for original Pixels matrix
+
 	Pixels = vector <vector <int> > (newRow, vector<int> (newCol));
 
-	for(unsigned int i = 0; i < newRow; i++){
-		for(unsigned int j = 0; j < newCol; j++){
+	for(size_t i = 0; i < newRow; i++){
+		for(size_t j = 0; j < newCol; j++){
 			Pixels[i][j] = temp[i % temp.size()][j % temp[0].size()];
-			//cout << "Pixels[" << i << "][" << j << "] = " << Pixels[i][j] << endl;
-			//cout << "temp[" << (i % temp.size()) << "][" << (j % temp[0].size()) << "] = " << temp[i%temp.size()][j%temp[0].size()] << endl;
-			//cout << "---------------------------------" << endl;
-
 		}
 	}
-	//cout << "After Panel, Pixels.size() = " << Pixels.size() << " and Pixels[0].size = " << Pixels[0].size() << endl;
 	return true;
 }
 
 
-//Panel
-//r=2, c=2
-//2x3 --> 4x6	2*r=4	3*c=6
-//
-//1 2 3		1 2 3
-//4 5 6		4 5 6
-//	  1 2 3 1 2 3
-//    4 5 6 4 5 6
-//
-//k goes 0-5 -->  012012 by doing k%3
-//0%3=0, 1%3=1, 2%3=2, 3%3=0, 4%3=1, 5%3=2
-//------------------------------------------
 
+
+/* Crops the pgm file from the given starting row col position to new given row and col sizes.
+ * ERROR if the Pixels matrix is empty or the user tries to crop more than what's available. */
 
 bool Pgm::Crop(size_t r, size_t c, size_t rows, size_t cols){
-	(void) r;		//Starting row position
-	(void) c;		//Starting col position
-	(void) rows;	//New row size
-	(void) cols;	//New col size
+	(void) r;								//Starting row position
+	(void) c;								//Starting col position
+	(void) rows;							//New row size
+	(void) cols;							//New col size
 
-	if(Pixels.size() == 0)
+	if(Pixels.size() == 0 || Pixels.size() < (r+rows) || Pixels[0].size() < (c+cols))
 		return false;
 
-	//cout << Pixels.size() << " vs " << rows << endl;
-	//cout << Pixels[0].size() << " vs " << cols << endl;
-
-	if(Pixels.size() < (r+rows) || Pixels[0].size() < (c+cols))
-		return false;
-
-	vector <vector <int> > temp = Pixels;
+	vector <vector <int> > temp = Pixels;	//Placeholder for original Pixels matrix
 	Pixels = vector <vector <int> > (rows, vector<int> (cols));
 
 	
-	for(unsigned int i = 0; i < Pixels.size(); i++){
-		for(unsigned int j = 0; j < Pixels[0].size(); j++){
+	for(size_t i = 0; i < Pixels.size(); i++){
+		for(size_t j = 0; j < Pixels[0].size(); j++){
 			Pixels[i][j] = temp[r+i][c+j];
 		}
 	}
-	
-	//cout << "After Crop, Pixels.size() = " << Pixels.size() << " and Pixels[0].size() = " << Pixels[0].size() << endl;
 	return true;
 }
-
-
-//Crop
-//45 - starting row 
-//60 - starting column
-//50 - new row
-//100- new column
-//
-//[45-95] [60-160]
-//
-//200x300
-//
-//50x100 - loop 50 & 100?
-//45, 60 - start at 45 & 60?
-//
-//
-//0, 1, 2, 2
-//
-//1 2 3	    -->  2 3
-//4 5 6			 5 6
