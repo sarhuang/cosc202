@@ -40,8 +40,8 @@ string Hash_202::Set_Up(size_t table_size, const std::string &fxn, const std::st
 	(void) table_size;	//Size of the hash table
 	(void) fxn;			//Hash function name (either 'Last7' or 'XOR')
 	(void) collision;	//Collision resolution strategy (either 'Linear' Probing or 'Double' Hasing)
-
-	Nprobes = 0;	//FIX LATER
+	Nkeys = 0;
+	Nprobes = 0;
 
 	//ERROR CHECKING
 	if(Keys.size() != 0)
@@ -96,13 +96,12 @@ string Hash_202::Add(const string &key, const string &val){
 	int origHex = 0;        //Hexidecimal int calculated by 1st hash function
 	int newIndex = 0;       //Index calculated by the 2nd hash function
 	size_t loopRepeat = 0;  //The incrementing variable aka the 'i' for Double Hashing (H2*i)
+	int currProbes = 0;		//Current number of probes (used to cancel total if it doesn't count)
 
 	size_t counter = 0;     //Count stuff, general purpose integer
 	string sevenDigits;		//Placeholder for 7 char digits
 	int result = 0;         //Placeholder for the new index after the Double Hash formula
 	
-	int currProbes = 0;		//FIX LATER
-
 
 	//ERROR CHECKING
 	if(Keys.size() == 0)
@@ -115,16 +114,9 @@ string Hash_202::Add(const string &key, const string &val){
 	}
 	if(val == "")
 		return "Empty val";
-	for(unsigned int z = 0; z < Keys.size(); z++){
-		if(Keys[z] != "")
-			counter++;
-	}
-	if(counter == Keys.size())
+	if(Nkeys == Keys.size())
 		return "Hash table full";
-	else 
-		counter = 0;
-
-
+	
 
 	//LAST7 - Grabs the last 7 characters of the hex (or all if less than 7) and convert to int.
 	if(Fxn == 'L'){
@@ -189,6 +181,7 @@ string Hash_202::Add(const string &key, const string &val){
 	if(Keys[origIndex] == ""){
 		Keys[origIndex] = key;
 		Vals[origIndex] = val;
+		Nkeys++;
 	}
 	else{
 		//LINEAR PROBING
@@ -199,14 +192,14 @@ string Hash_202::Add(const string &key, const string &val){
 				if(Keys[counter] == ""){
 					Keys[counter] = key;
 					Vals[counter] = val;
+					Nkeys++;
 					return "";
 				}
 				else if(Keys[counter] == key){
 					Nprobes -= currProbes;
 					return "Key already in the table";
 				}
-
-				Nprobes++;		//FIX THIS LATER
+				Nprobes++;
 				currProbes++;
 			}
 			Nprobes -= currProbes;
@@ -266,29 +259,24 @@ string Hash_202::Add(const string &key, const string &val){
 				if(Keys[result] == ""){
 					Keys[result] = key;
 					Vals[result] = val;
+					Nkeys++;
 					return "";
 				}
 				else if(Keys[result] == key){
 					Nprobes -= currProbes;
 					return "Key already in the table";
 				}
-
-				Nprobes++;		//FIX THIS
+				Nprobes++;
 				currProbes++;
 			}
 
 			//ERROR CHECKING - if the double hashing doesn't work or it's full
-			counter = 0;
-			for(unsigned int s = 0; s < Keys.size(); s++){
-				if(Keys[s] != "")
-					counter++;
-			}
-			if(counter < Keys.size()){
-				Nprobes -= currProbes;			//FIX THIS
+			if(Nkeys < Keys.size()){
+				Nprobes -= currProbes;
 				return "Cannot insert key";
 			}
 			else{
-				Nprobes -= currProbes;			//FIX THIS
+				Nprobes -= currProbes;
 				return "Hash table full";
 			}
 		}
@@ -300,7 +288,7 @@ string Hash_202::Add(const string &key, const string &val){
 
 
 /* Find() - RETURNS THE VAL ASSOCIATED WITH THE GIVEN KEY
- * 
+ *
  * Return an empty string "" if the hash table...
  *		1. Has not been set up yet
  *		2. The key is not in the hash table
@@ -318,9 +306,10 @@ string Hash_202::Find(const string &key){
 		if(key[i] < '0' || (key[i] > '9' && key[i] < 'a') || key[i] > 'f')
 			return "";
 	}
-
-	for(unsigned int j = 0; j < Keys.size(); j++){		//Fix this
-		if(Keys[j] == key)
+	
+	
+	for(unsigned int j = 0; j < Keys.size(); j++){		
+		if(key == Keys[j])
 			return Vals[j];
 	}
 	return "";
@@ -355,7 +344,11 @@ size_t Hash_202::Total_Probes(){
 	int total = 0;	//Total number of probes
 
 	if(Keys.size() != 0){
-		total = Nprobes;
+		for(unsigned int i = 0; i < Keys.size(); i++){
+			if(Keys[i] != ""){
+				total = Nprobes;
+			}
+		}
 	}
 	return total;
 }
