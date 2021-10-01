@@ -360,10 +360,10 @@ Bitmatrix *Product(const Bitmatrix *a1, const Bitmatrix *a2)
 	//printf("Cols: %d\n", bm->Cols());
 
 
-	for(int r = 0; r < 9; r++){	//a1->Rows()
-		for(int bmCol = 0; bmCol < 8; bmCol++){	//a2->Cols()
+	for(int r = 0; r < a1->Rows(); r++){	//a1->Rows()
+		for(int bmCol = 0; bmCol < a2->Cols(); bmCol++){	//a2->Cols()
 			
-			for(int c = 0; c < 4; c++){	//a2->Rows()
+			for(int c = 0; c < a2->Rows(); c++){	//a2->Rows()
 				ss.clear();
 				ss << a1->Val(r, c);
 				ss >> a1Char;
@@ -399,9 +399,22 @@ Bitmatrix *Product(const Bitmatrix *a1, const Bitmatrix *a2)
 //If rows is empty or contains bad indices, return NULL
 Bitmatrix *Sub_Matrix(const Bitmatrix *a1, const vector <int> &rows)
 {
-  (void) a1;
-  (void) rows;
-  return NULL;
+	(void) a1; 
+	(void) rows;
+
+	if(rows.size() == 0)
+		return NULL;
+
+	Bitmatrix *bm = new Bitmatrix(rows.size(), a1->Cols());
+
+	for(unsigned int r = 0; r < rows.size(); r++){
+		if(rows[r] < 0 || rows[r] >= a1->Rows())
+			return NULL;
+
+		for(int c = 0; c < a1->Cols(); c++)
+			bm->Set(r, c, a1->Val(rows[r], c));
+	}
+	return bm;
 }
 
 //Create and return the inverse of a1
