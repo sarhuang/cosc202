@@ -1,9 +1,8 @@
 /* Name: Sarah Huang
- * Date: 
+ * Date: 10/2/21
  * Program: bitmatrix.cpp
- * Purpose:
+ * Purpose: Create and manipulate bit matrices. Also store them in a hash table.
  */
-
 
 #include <fstream>
 #include <sstream>
@@ -23,15 +22,14 @@ using namespace std;
  * Throw the string "Bad rows" if (rows <= 0).
  * Throw the string "Bad cols" if (cols <= 0). */
 Bitmatrix::Bitmatrix(int rows, int cols){
-	(void) rows;
-	(void) cols;
-	string r = "Bad rows";
-	string c = "Bad cols";
-	string z;
+	(void) rows;			//Number of rows in bitmatrix
+	(void) cols;			//Number of columns in bitmatrix
+	string r = "Bad rows";	//Error message
+	string c = "Bad cols";	//Error message
+	string z;				//A string of '0' to put into M
 	
 	if(rows <= 0)
 		throw(r);
-	
 	if(cols <= 0)
 		throw(c);
 
@@ -39,14 +37,13 @@ Bitmatrix::Bitmatrix(int rows, int cols){
 	
 	if(rows > 0 && cols > 0){
 		M.resize(rows);
-		
 		for(int i = 0; i < rows; i++){
 			M.at(i) = z;
 		}
 	}
 }
-           
 
+           
 /* Read the bitmatrix from a file.
  * Throw "Can't open file" if you can't open the file.
  * Throw "Bad file format" if you can't read the file. 
@@ -56,22 +53,20 @@ Bitmatrix::Bitmatrix(int rows, int cols){
  * 3. Each non-blank line represents a row of the matrix (with whitespace ignored)
  * 4. Each row has to have the same number of columns. */
 Bitmatrix::Bitmatrix(const string &fn){
-	(void) fn;
-	ifstream fin;
-	string row;
-	string newRow;
-	string noOpen = "Can't open file";
+	(void) fn;							//File name
+	ifstream fin;						//File input stream
+	string row;							//Current row
+	string newRow;						//New row without whitespace
+	string noOpen = "Can't open file";	//Error message
 		
+	//Error check
 	fin.open(fn.c_str());
 	if(fin.fail())
 		throw(noOpen);
 
-	//if(!(fin >> row))
-	//	throw("Bad file format");
 
 	do{
-		getline(fin, row);
-		
+		getline(fin, row);	
 		if(row != ""){
 			for(unsigned int i = 0; i < row.size(); i++){
 				if(row[i] == '0' || row[i] == '1')
@@ -89,13 +84,10 @@ Bitmatrix::Bitmatrix(const string &fn){
 /* Create a new bitmatrix using new, which is a copy of the caller's bitmatrix
  * Return a pointer to it. */
 Bitmatrix *Bitmatrix::Copy() const {
-	Bitmatrix *copy = new Bitmatrix(M.size(), M.at(0).size());	
+	Bitmatrix *copy = new Bitmatrix(M.size(), M.at(0).size());
 	copy->M = this->M;
 	return copy;
 }
-                 
-
-
 
 
 /* Write to a file.  
@@ -103,9 +95,10 @@ Bitmatrix *Bitmatrix::Copy() const {
  *	- Each line is only composed of 0's and 1's.
  * Return true if successful and false if not. */	                                            
 bool Bitmatrix::Write(const string &fn) const {
-	(void) fn;
-	ofstream ofs;
+	(void) fn;			//File name
+	ofstream ofs;		//Output file stream
 
+	//Error check
 	ofs.open(fn.c_str());
 	if(!ofs)
 		return false;
@@ -127,17 +120,18 @@ bool Bitmatrix::Write(const string &fn) const {
  * 1. If w <= 0, print each row on its own line with no spaces.
  *	  Otherwise, print a space after every w columns and a blank line after every w rows.*/
 void Bitmatrix::Print(size_t w) const {
-	(void) w;
+	(void) w;	//Put a space after this many characters
 	
+
 	if(M.size() != 0){
 		for(unsigned int r = 0; r < M.size(); r++){
+			//Printing without space
 			if(w <= 0 || w >= M.at(r).size())
 				printf("%s\n", M.at(r).c_str());
-
+			
+			//Printing with space
 			else{
-				//Printing row with spacing	
 				printf("%s ", M.at(r).substr(0, w).c_str());
-				
 				for(unsigned int i = w; i < M.at(r).size(); i++){
 					if(i % w == 0){
 						if((M.at(r).size() - i) <= w)
@@ -147,6 +141,7 @@ void Bitmatrix::Print(size_t w) const {
 					}
 				}
 			}
+			//Printing the last blank line
 			if(w != 0 && ((r+1) % w == 0)){	
 				if(M.size() % w != 0 || r != M.size()-1)
 					printf("\n");
@@ -163,35 +158,39 @@ void Bitmatrix::Print(size_t w) const {
  * 1. Zero entries are white(255) and one entries are gray(100)
  * 2. Each entry is a pixels by pixels square
  * 3. If border > 0, there should be black(0) border of that many pixels separating each square and around the whole matrix. */
-bool Bitmatrix::PGM(const string &fn, int p, int border) const		//DO THIS LAST!!!
-{
-	(void) fn; 
-	(void) p;
-	(void) border;
-	ofstream ofs;
+bool Bitmatrix::PGM(const string &fn, int p, int border) const	{
+	(void) fn;			//File name
+	(void) p;			//Size of each matrix entry
+	(void) border;		//Width of black pixel border
+	ofstream ofs;		//Output file stream
 
+	//Error check
 	ofs.open(fn.c_str());
 	if(!ofs || M.size() == 0)
 		return false;
 
-	size_t oldRow = M.size();
-	size_t oldCol = M.at(0).size();
-	size_t newRow = oldRow*p + border*(oldRow+1);
-	size_t newCol = oldCol*p + border*(oldCol+1);
-	string zeroes(newCol, 'b');
-	vector <string> temp(newRow, zeroes);
-	int rowCounter = 0;
-	int colCounter = 0;
+	size_t oldRow = M.size();						//Original row size
+	size_t oldCol = M.at(0).size();					//Original column size
+	size_t newRow = oldRow*p + border*(oldRow+1);	//New row size with border
+	size_t newCol = oldCol*p + border*(oldCol+1);	//New column size with border
+	
+	string zeroes(newCol, 'b');						//String of 'b' = zeroes
+	vector <string> temp(newRow, zeroes);			//New string vector with updated row and col sizes full of 'b'
+	int rowCounter = 0;								//Counts row index for M
+	int colCounter = 0;								//Counts col index for M
 
 
 	ofs << "P2" << endl;
 	ofs << newCol << " " << newRow << endl;
 	ofs << 255 << endl;
 
+
 	if(border > 0){
+		//The for loops increment to the spot where the matrix entry goes, skipping the border
 		for(unsigned int r = border; r < newRow; r+=(border+p)){
 			for(unsigned int c = border; c < newCol; c+=(border+p)){
 				
+				//Makes the p x p
 				for(int a = 0; a < p; a++){
 					for(int b = 0; b < p; b++){
 						temp[r+a][c+b] = M[rowCounter][colCounter];
@@ -199,15 +198,14 @@ bool Bitmatrix::PGM(const string &fn, int p, int border) const		//DO THIS LAST!!
 				}
 				colCounter++;
 			}
-			//printf("%d - %d\n", rowCounter, colCounter);
 			rowCounter++;
 			colCounter = 0;
 		}
 	}
+	//No border - equivalent to the one above but not including border
 	else{
 		for(unsigned int r = 0; r < newRow; r+=p){
 			for(unsigned int c = 0; c < newCol; c+=p){
-				
 				for(int a = 0; a < p; a++){
 					for(int b = 0; b < p; b++){
 						temp[r+a][c+b] = M[rowCounter][colCounter];
@@ -220,42 +218,39 @@ bool Bitmatrix::PGM(const string &fn, int p, int border) const		//DO THIS LAST!!
 		}
 	}
 
+	//Writes the pgm file using the new vector of strings
 	for(unsigned int i = 0; i < temp.size(); i++){
 		for(unsigned int j = 0; j < temp.at(0).size(); j++){
 			if(temp[i][j] == '0')
 				ofs << "255" << " ";
-			
 			else if(temp[i][j] == '1')
 				ofs << "100" << " ";
-			
 			else if(border > 0)
 				ofs << "0" << " ";
 		}
 		ofs << endl << endl;
 	}
-
 	return true;
 }
 
 
-
-
 //Return number of rows
-int Bitmatrix::Rows() const
-{
+int Bitmatrix::Rows() const{
 	return M.size();
 }
+
+
 //Return number of columns
-int Bitmatrix::Cols() const
-{
+int Bitmatrix::Cols() const{
 	return M.at(0).size();
 }                          
+
+
 /* Return specified element ('0' or '1')
  * Return 'x' if row or col is bad */
-char Bitmatrix::Val(int row, int col) const
-{
-	(void) row;
-	(void) col;
+char Bitmatrix::Val(int row, int col) const{
+	(void) row;	//Specific row index
+	(void) col;	//Specific col index
 
 	if((unsigned int)row >= M.size() || (unsigned int)col >= M.at(0).size())
 		return 'x';
@@ -264,28 +259,24 @@ char Bitmatrix::Val(int row, int col) const
 }
             
 
-
-
 /* Set the specified element to val.
  * Val must be 0, 1, '0', or '1'
  * If val is 0 or 1, store '0'/'1' in the matrix.
  * Return true if successful and false if not. */
-bool Bitmatrix::Set(int row, int col, char val)
-{
-	(void) row;
-	(void) col;
-	(void) val;
+bool Bitmatrix::Set(int row, int col, char val){
+	(void) row;		//Specific row index
+	(void) col;		//Specific col index
+	(void) val;		//0, 1, '0', or '1'
 	
-	if((unsigned int)row >= M.size() || (unsigned int)col >= M.at(0).size()){
+
+	//Error checking - bad input
+	if((unsigned int)row >= M.size() || (unsigned int)col >= M.at(0).size())
 		return false;
-	}
 	
 	if(val == 0 || val == '0')
 		M[row][col] = '0';
-
 	else if(val == 1 || val == '1')
 		M[row][col] = '1';
-	
 	else
 		return false;
   
@@ -295,15 +286,14 @@ bool Bitmatrix::Set(int row, int col, char val)
 
 /* Swap these rows.  
  * Return true if successful and false if not. */
-bool Bitmatrix::Swap_Rows(int r1, int r2)
-{
-	(void) r1;
-	(void) r2;
-	string holder;
+bool Bitmatrix::Swap_Rows(int r1, int r2){
+	(void) r1;		//Row index #1
+	(void) r2;		//Row index #2
+	string holder;	//Holds string at r1 before it gets replaced
 
+	//Error checking - bad input
 	if((size_t) r1 >= M.size() || (size_t) r2 >= M.size())
 		return false;
-
 	else{
 		holder = M.at(r1);
 		M.at(r1) = M.at(r2);
@@ -315,20 +305,20 @@ bool Bitmatrix::Swap_Rows(int r1, int r2)
 
 /* Set the row r1 to the sum of row r1 and r2.
  * Rdjeturn true if successful and false if not. */
-bool Bitmatrix::R1_Plus_Equals_R2(int r1, int r2)
-{
-	(void) r1;
-	(void) r2;
-	int r1Char = 0;
-	int r2Char = 0;
-	stringstream ss;
+bool Bitmatrix::R1_Plus_Equals_R2(int r1, int r2){
+	(void) r1;			//Row index #1
+	(void) r2;			//Row index #2
+	int r1Char = 0;		//integer 0 or 1
+	int r2Char = 0;		//integer 0 or 1
+	stringstream ss;	//Stringstream
   
+	//Error checking - bad input
 	if((size_t) r1 >= M.size() || (size_t) r2 >= M.size())
 		return false;
-
 	else{
 		for(unsigned int i = 0; i < M.at(r1).size(); i++){
-			ss.clear();
+			//Convert char to int
+			ss.clear();			
 			ss << M[r1][i];
 			ss >> r1Char;
 			ss.clear();
@@ -348,11 +338,6 @@ bool Bitmatrix::R1_Plus_Equals_R2(int r1, int r2)
 }
       
 
-
-
-
-
-
 /* Return true if successful and false if not.
  * They must be written using the methods of the Bitmatrix class above.
  * Return NULL if unsuccessful. 
@@ -361,20 +346,23 @@ bool Bitmatrix::R1_Plus_Equals_R2(int r1, int r2)
 
 //Creates new bit-matrix which is the sum of a1 and a2
 //Return NULL if a1 and a2 are NOT the same size
-Bitmatrix *Sum(const Bitmatrix *a1, const Bitmatrix *a2)
-{
-	(void) a1;  
-	(void) a2;
-	stringstream ss;
-	Bitmatrix *bm;
-	int a1Char = 0;
-	int a2Char = 0;
+Bitmatrix *Sum(const Bitmatrix *a1, const Bitmatrix *a2){
+	(void) a1;			//Bitmatrix #1
+	(void) a2;			//Bitmatrix #2
+	stringstream ss;	//Stringstream
+	Bitmatrix *bm;		//Bitmatrix result of adding a1 and a2
+	int a1Char = 0;		//integer 0 or 1
+	int a2Char = 0;		//integer 0 or 1
 
+
+	//Error checking - they do not have the same dimensions
 	if(a1->Rows() != a2->Rows() && a1->Cols() != a2->Cols())
 		return NULL;
 	
+	
 	bm = new Bitmatrix(a1->Rows(), a1->Cols());
-
+	
+	//Similar to r1 += r2 function
 	for(int r = 0; r < a1->Rows(); r++){
 		for(int c = 0; c < a1->Cols(); c++){
 			ss.clear();
@@ -396,37 +384,29 @@ Bitmatrix *Sum(const Bitmatrix *a1, const Bitmatrix *a2)
 	return bm;
 }
 
+
 //Create new bit-matrix which is the products of a1 and a2
 //a1->Rows() rows and a2->Cols() columns
 //If a1->Cols() DOES NOT match a2->Rows(), return NULL
-Bitmatrix *Product(const Bitmatrix *a1, const Bitmatrix *a2)
-{
-	(void) a1; 
-	(void) a2;
-	stringstream ss;
-	Bitmatrix *bm;
-	int a1Char = 0;
-	int a2Char = 0;
-	int product = 0;
+Bitmatrix *Product(const Bitmatrix *a1, const Bitmatrix *a2){
+	(void) a1;			//Bitmatrix #1
+	(void) a2;			//Bitmatrix #2
+	stringstream ss;	//Stringstream
+	Bitmatrix *bm;		//Product matrix for a1 and a2
+	int a1Char = 0;		//integer 0 or 1
+	int a2Char = 0;		//integer 0 or 1
+	int product = 0;	//integer product
 
-	//printf("a1 Row = %d\n", a1->Rows());
-	//printf("a1 Col = %d\n", a1->Cols());
-	//printf("a2 Row = %d\n", a2->Rows());
-	//printf("a2 Col = %d\n", a2->Cols());
-
+	//Error checking - unable to multiply due to dimensions
 	if(a1->Cols() != a2->Rows())
 		return NULL;
 
 	bm = new Bitmatrix(a1->Rows(), a2->Cols());
 	
-	//printf("Rows: %d\n", bm->Rows());
-	//printf("Cols: %d\n", bm->Cols());
-
-
-	for(int r = 0; r < a1->Rows(); r++){	//a1->Rows()
-		for(int bmCol = 0; bmCol < a2->Cols(); bmCol++){	//a2->Cols()
-			
-			for(int c = 0; c < a2->Rows(); c++){	//a2->Rows()
+	
+	for(int r = 0; r < a1->Rows(); r++){	
+		for(int bmCol = 0; bmCol < a2->Cols(); bmCol++){	
+			for(int c = 0; c < a2->Rows(); c++){	
 				ss.clear();
 				ss << a1->Val(r, c);
 				ss >> a1Char;
@@ -434,18 +414,10 @@ Bitmatrix *Product(const Bitmatrix *a1, const Bitmatrix *a2)
 				ss << a2->Val(c, bmCol);
 				ss >> a2Char;
 
-				//printf("%d-%d-%d\n", r, bmCol, c);
-				//printf("%d	%d\n", a1Char, a2Char);
-				
 				product = product + (a1Char * a2Char);
-				//printf("product = %d\n", product);
-
 				a1Char = 0;
 				a2Char = 0;
 			}
-
-			//printf("%%2 = %d\n---------------------\n", product%2);
-
 			if(product % 2 == 0)
 				bm->Set(r, bmCol, '0');
 			else
@@ -457,20 +429,22 @@ Bitmatrix *Product(const Bitmatrix *a1, const Bitmatrix *a2)
 	return bm;
 }
 
+
 //Creates new bit0matrix composed of the specified rows of the given bit-matrix
 //It's ok to repeat entries in rows
 //If rows is empty or contains bad indices, return NULL
-Bitmatrix *Sub_Matrix(const Bitmatrix *a1, const vector <int> &rows)
-{
-	(void) a1; 
-	(void) rows;
+Bitmatrix *Sub_Matrix(const Bitmatrix *a1, const vector <int> &rows){
+	(void) a1;		//Bitmatrix
+	(void) rows;	//A vector of rows to copy from a1
 
+	//Error check - bad input
 	if(rows.size() == 0)
 		return NULL;
 
 	Bitmatrix *bm = new Bitmatrix(rows.size(), a1->Cols());
 
 	for(unsigned int r = 0; r < rows.size(); r++){
+		//Error check - bad row index
 		if(rows[r] < 0 || rows[r] >= a1->Rows())
 			return NULL;
 
@@ -480,17 +454,17 @@ Bitmatrix *Sub_Matrix(const Bitmatrix *a1, const vector <int> &rows)
 	return bm;
 }
 
+
 //Create and return the inverse of a1
 //Use Swap_Rows() and R1_Plus_Equals_R2()
 //If a1 is not square or not invertible, return NULL
-Bitmatrix *Inverse(const Bitmatrix *m)	//WORK ON THIS LAST!!! and check notes at bottom of writeup
-{
-	(void) m;
-	Bitmatrix *inv = new Bitmatrix(m->Rows(), m->Cols());
-	Bitmatrix *bm = m->Copy();
+Bitmatrix *Inverse(const Bitmatrix *m){
+	(void) m;												//Given bitmatrix to inverse
+	Bitmatrix *inv = new Bitmatrix(m->Rows(), m->Cols());	//Identity matrix -> inverse
+	Bitmatrix *bm = m->Copy();								//Copy of given bitmatrix to manipulate
 
-	int addToRow = 0;
-	int lastRow = m->Cols()-1;
+	int addToRow = 0;			//Add this to current row index to see available row to swap with
+	int lastRow = m->Cols()-1;	//The last row and increments up (after you get upper triangular)
 
 
 	//Checking if it's square
@@ -498,7 +472,7 @@ Bitmatrix *Inverse(const Bitmatrix *m)	//WORK ON THIS LAST!!! and check notes at
 		return NULL;
 	}
 
-	//Making inv
+	//Making inv identity matrix
 	for(int i = 0; i < inv->Rows(); i++){
 		for(int j = 0; j < inv->Cols(); j++){	
 			if(i == j)
@@ -508,9 +482,8 @@ Bitmatrix *Inverse(const Bitmatrix *m)	//WORK ON THIS LAST!!! and check notes at
 		}
 	}
 
-
-
 	for(int r = 0; r < bm->Rows(); r++){
+		//Swapping row if applciable
 		if(bm->Val(r, r) != '1'){
 			for(int a = 1; a < bm->Rows() - r; a++){
 				if(bm->Val(r+a, r) == '1'){
@@ -519,15 +492,12 @@ Bitmatrix *Inverse(const Bitmatrix *m)	//WORK ON THIS LAST!!! and check notes at
 				}
 			}
 
-			if(addToRow == 0){
-				//printf("i couldn't find a row to swap with\n");
-				return NULL;
-			}
-			
+			//Error check - cannot swap with any row
+			if(addToRow == 0)
+				return NULL;	
 			else{
 				bm->Swap_Rows(r, r+addToRow);
 				inv->Swap_Rows(r, r+addToRow);
-				//printf("after swap, bm[i][i] %c\n", inv->Val(r, r+addToRow));
 			}
 		}
 
@@ -553,33 +523,20 @@ Bitmatrix *Inverse(const Bitmatrix *m)	//WORK ON THIS LAST!!! and check notes at
 		lastRow = bm->Cols()-1;
 	}
 
-	
-	//Checking if bm is identity matrix to see if its invertible
+
+	//ERROR CHECK if bm is identity matrix to see if its invertible
 	for(int y = 0; y < bm->Rows(); y++){
 		for(int z = 0; z < bm->Cols(); z++){
-			//printf("%d-%d  %c\n", y, z, bm->Val(y, z));
-
-
-			if(y == z && bm->Val(y, z) != '1'){
-				//printf("no 1 staircase\n");
+		
+			if(y == z && bm->Val(y, z) != '1')
 				return NULL;
-			}
-
-			else if(y != z && bm->Val(y, z) != '0'){
-				//printf("i wanted to check the rest\n");
+	
+			else if(y != z && bm->Val(y, z) != '0')
 				return NULL;
-			}
 		}
 	}
-
-
 	return inv;
 }
-
-
-
-
-
 
 
 /* HTE class - This is a "hash table entry". 
@@ -602,10 +559,9 @@ Bitmatrix *Inverse(const Bitmatrix *m)	//WORK ON THIS LAST!!! and check notes at
 
 /* You specify the table size in the constructor.
  * Throw the string "Bad size" if (size <= 0). */
-BM_Hash::BM_Hash(int size)
-{
-	(void) size;
-	string err = "Bad size";
+BM_Hash::BM_Hash(int size){
+	(void) size;				//Hash table size
+	string err = "Bad size";	//Error message
 
 	if(size <= 0)
 		throw(err);
@@ -613,29 +569,28 @@ BM_Hash::BM_Hash(int size)
 	Table.resize(size);
 }
 
+
 /* Store a bitmatrix with the given key. 
  * Return true if successful and false if not. 
  * Return false if the key is already there. */
-bool BM_Hash::Store(const string &key, Bitmatrix *bm)
-{
-	(void) key;
+bool BM_Hash::Store(const string &key, Bitmatrix *bm){
+	(void) key;	
 	(void) bm;
-
-	size_t i;
-	unsigned int h;
+	unsigned int hash;
 
 	HTE entry;
 	entry.key = key;
 	entry.bm = bm;
 	
-	//djb_hash()?
-	h = 5381;
-	for(i = 0; i < key.size(); i++){
-		h = (h << 5) + h + key[i];
+	//djb_hash()
+	hash = 5381;
+	for(size_t i = 0; i < key.size(); i++){
+		hash = (hash << 5) + hash + key[i];
 	}		
-	h = h % Table.size();
+	hash = hash % Table.size();
 
 
+	//Check if the bitmatrix is already in hash table
 	for(unsigned int j = 0; j < Table.size(); j++){
 		for(unsigned int k = 0; k < Table[j].size(); k++){
 			if(Table[j][k].key == key)
@@ -643,14 +598,14 @@ bool BM_Hash::Store(const string &key, Bitmatrix *bm)
 		}
 	}
 
-	Table[h].push_back(entry);
+	Table[hash].push_back(entry);
 	return true;
 }
 
+
 /* Retrieve a bitmatrix with the given key.
  * Return NULL if unsuccessful. */
-Bitmatrix *BM_Hash::Recall(const string &key) const
-{
+Bitmatrix *BM_Hash::Recall(const string &key) const{
 	(void) key;
 	
 	for(unsigned int i = 0; i < Table.size(); i++){
@@ -662,11 +617,11 @@ Bitmatrix *BM_Hash::Recall(const string &key) const
 	return NULL;
 }
 
+
 //Return a vector of all of the hash table entries.
 //Stores the entries in order
 //		Ex. "A" hashes 5, "B" hashes 1, "C" hashes 1 but was added later --> Return HTE's in order "B", "C", "A"
-vector <HTE> BM_Hash::All() const
-{
+vector <HTE> BM_Hash::All() const{
 	vector <HTE> rv;
   
 	for(unsigned int i = 0; i < Table.size(); i++){
@@ -674,6 +629,5 @@ vector <HTE> BM_Hash::All() const
 			rv.push_back(Table[i][j]);
 		}
 	}
-	
 	return rv;
 }
