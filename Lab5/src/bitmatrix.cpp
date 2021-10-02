@@ -165,10 +165,76 @@ void Bitmatrix::Print(size_t w) const {
  * 3. If border > 0, there should be black(0) border of that many pixels separating each square and around the whole matrix. */
 bool Bitmatrix::PGM(const string &fn, int p, int border) const		//DO THIS LAST!!!
 {
-  (void) fn;
-  (void) p;
-  (void) border;
-  return false;
+	(void) fn; 
+	(void) p;
+	(void) border;
+	ofstream ofs;
+
+	ofs.open(fn.c_str());
+	if(!ofs || M.size() == 0)
+		return false;
+
+	size_t oldRow = M.size();
+	size_t oldCol = M.at(0).size();
+	size_t newRow = oldRow*p + border*(oldRow+1);
+	size_t newCol = oldCol*p + border*(oldCol+1);
+	string zeroes(newCol, 'b');
+	vector <string> temp(newRow, zeroes);
+	int rowCounter = 0;
+	int colCounter = 0;
+
+
+	ofs << "P2" << endl;
+	ofs << newCol << " " << newRow << endl;
+	ofs << 255 << endl;
+
+	if(border > 0){
+		for(unsigned int r = border; r < newRow; r+=(border+p)){
+			for(unsigned int c = border; c < newCol; c+=(border+p)){
+				
+				for(int a = 0; a < p; a++){
+					for(int b = 0; b < p; b++){
+						temp[r+a][c+b] = M[rowCounter][colCounter];
+					}
+				}
+				colCounter++;
+			}
+			//printf("%d - %d\n", rowCounter, colCounter);
+			rowCounter++;
+			colCounter = 0;
+		}
+	}
+	else{
+		for(unsigned int r = 0; r < newRow; r+=p){
+			for(unsigned int c = 0; c < newCol; c+=p){
+				
+				for(int a = 0; a < p; a++){
+					for(int b = 0; b < p; b++){
+						temp[r+a][c+b] = M[rowCounter][colCounter];
+					}
+				}
+				colCounter++;
+			}
+			rowCounter++;
+			colCounter = 0;
+		}
+	}
+
+	for(unsigned int i = 0; i < temp.size(); i++){
+		for(unsigned int j = 0; j < temp.at(0).size(); j++){
+			if(temp[i][j] == '0')
+				ofs << "255" << " ";
+			
+			else if(temp[i][j] == '1')
+				ofs << "100" << " ";
+			
+			else if(border > 0)
+				ofs << "0" << " ";
+		}
+		ofs << endl << endl;
+	}
+
+	return true;
 }
 
 
@@ -191,9 +257,6 @@ char Bitmatrix::Val(int row, int col) const
 	(void) row;
 	(void) col;
 
-	//printf("M.size() = %lu\n", M.size());
-	//printf("M.at(0).size() = %lu\n", M.at(0).size());
-	
 	if((unsigned int)row >= M.size() || (unsigned int)col >= M.at(0).size())
 		return 'x';
 	else
@@ -422,8 +485,95 @@ Bitmatrix *Sub_Matrix(const Bitmatrix *a1, const vector <int> &rows)
 //If a1 is not square or not invertible, return NULL
 Bitmatrix *Inverse(const Bitmatrix *m)	//WORK ON THIS LAST!!! and check notes at bottom of writeup
 {
-  (void) m;
-  return NULL;
+	(void) m;
+	Bitmatrix *inv = new Bitmatrix(m->Rows(), m->Cols());
+	Bitmatrix *bm = m->Copy();
+
+	int addToRow = 0;
+	int lastRow = m->Cols()-1;
+
+
+	//Checking if it's square
+	if(bm->Rows() != bm->Cols()){
+		return NULL;
+	}
+
+	//Making inv
+	for(int i = 0; i < inv->Rows(); i++){
+		for(int j = 0; j < inv->Cols(); j++){	
+			if(i == j)
+				inv->Set(i, j, '1');
+			else
+				inv->Set(i, j, '0');
+		}
+	}
+
+
+
+	for(int r = 0; r < bm->Rows(); r++){
+		if(bm->Val(r, r) != '1'){
+			for(int a = 1; a < bm->Rows() - r; a++){
+				if(bm->Val(r+a, r) == '1'){
+					addToRow = a;
+					break;
+				}
+			}
+
+			if(addToRow == 0){
+				//printf("i couldn't find a row to swap with\n");
+				return NULL;
+			}
+			
+			else{
+				bm->Swap_Rows(r, r+addToRow);
+				inv->Swap_Rows(r, r+addToRow);
+				//printf("after swap, bm[i][i] %c\n", inv->Val(r, r+addToRow));
+			}
+		}
+
+		//If M[j][i] is 1, set row j equal to sum of rows i and j
+		for(int b = 1; b < bm->Rows()-r; b++){
+			if(bm->Val(r+b, r) == '1'){
+				bm->R1_Plus_Equals_R2(r+b, r);
+				inv->R1_Plus_Equals_R2(r+b, r);
+			}
+		}
+	}
+
+
+	//Start from last row and go to first row
+	for(int row = bm->Rows()-1; row >= 0; row--){
+		while(lastRow > row){
+			if(bm->Val(row, lastRow) == '1'){
+				bm->R1_Plus_Equals_R2(row, lastRow);
+				inv->R1_Plus_Equals_R2(row, lastRow);
+			}
+			lastRow--;
+		}
+		lastRow = bm->Cols()-1;
+	}
+
+	
+	//Checking if bm is identity matrix to see if its invertible
+	for(int y = 0; y < bm->Rows(); y++){
+		for(int z = 0; z < bm->Cols(); z++){
+			//printf("%d-%d  %c\n", y, z, bm->Val(y, z));
+
+
+			if(y == z && bm->Val(y, z) != '1'){
+				//printf("no 1 staircase\n");
+				return NULL;
+			}
+
+			else if(y != z && bm->Val(y, z) != '0'){
+				//printf("i wanted to check the rest\n");
+				return NULL;
+			}
+		}
+	}
+
+
+	return inv;
 }
 
 
