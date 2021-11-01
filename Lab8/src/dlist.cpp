@@ -1,34 +1,34 @@
 /* Name: Sarah Huang
- * Date: 
+ * Date: 11/1/2021
  * Program: dlist.cpp
- * Purpose:
+ * Purpose: Simulate a doubly-linked list.
+ *				- May be traversed in the forward and reverse direction
+ *				- Arbitrary insertion of nodes anywhere in the list
+ *				- Arbitrary deletion of any nodes
  */
-
 
 #include <iostream>
 #include "dlist.hpp"
-
 using namespace std;
-
 
 /*	class Dnode {
  *		friend class Dlist;
- *	    
  *		public:
- *	        string s;		
+ *			string s;		
  *			Dnode *Next();	- Returns d->flink
- *	        Dnode *Prev();	- Returns d->blink
- *	    
- *	    protected:
+ *			Dnode *Prev();	- Returns d->blink
+ *	           
+ *	        protected:
  *	        Dnode *flink;	- Points to the next node in the list		
- *			Dnode *blink;	- Points to the previous node in the list
+ *	        Dnode *blink;	- Points to the previous node in the list
  *	};
- *
- *	
- *	protected:
- *		Dnode *sentinel;	- Extra node which begins (and ends) each list
- *		size_t size;		- If a list contains size elements, it will contain size+1 nodes
+ *	            
+ *	             
+ *	    protected:
+ *	        Dnode *sentinel;	- Extra node which begins (and ends) each list
+ *			size_t size;		- If a list contains size elements, it will contain size+1 nodes
  */
+
 
 Dnode* Dnode::Next(){
 	return flink;
@@ -42,210 +42,140 @@ Dnode* Dnode::Prev(){
 
 //Constructor
 Dlist::Dlist(){
-	cout << "constructor" << endl;
-	Dnode *sentinel = new Dnode;
+	sentinel = new Dnode;
 	sentinel->flink = sentinel;
 	sentinel->blink = sentinel;
 }
-
-//Copy Constructor
+//Copy constructor
 Dlist::Dlist(const Dlist &d){
-	cout << "copy constructor" << endl;
-	(void) d;
-	sentinel = NULL;
+	sentinel = new Dnode;
+	sentinel->flink = sentinel;
+	sentinel->blink = sentinel;
 	*this = d;
 }
-
-//Assignment Overload
+//Assignment overload
 Dlist& Dlist::operator= (const Dlist &d){
-	cout << "overload" << endl;
-	Dlist tmp;
-	Dnode *n;
+	Dnode* n;
 
 	Clear();
-
-	for(n = d.Begin(); n != d.End(); n = n->Next()){
-		tmp.Push_Back(n->s);
+	for(n = d.Begin(); n != d.End(); n = n->flink){
+		Push_Back(n->s);
 	}
-	
 	return *this;
 }
-
 //Destructor
 Dlist::~Dlist(){
-	cout << "destructor" << endl;
 	Clear();
 	delete sentinel;
+	size--;
 }
 
 
 
-//Erase all nodes but sentinel
+//Clear the list - delete every node EXCEPT the sentinel
 void Dlist::Clear(){
-	//do not delete sentinel node
-	cout << "clear" << endl;
-	Dnode *d;
-
-	for(d = sentinel->flink; d != sentinel; d = d->Next()){
-		delete d;
+	while(!Empty()){
+		Erase(Begin());
 	}
-
-	size = 1;
 }
 
+//Returns whether the list is empty.
 bool Dlist::Empty() const{
-	if(size != 0)
-		return false;
-	else
+	if(sentinel->flink == sentinel && sentinel->blink == sentinel)
 		return true;
+	return false;
 }
 
+//Returns the list's size.
 size_t Dlist::Size() const{
 	return size;
 }
 
 
 
-
-//Put new strings on the front of list
+//Inserts a new node before the first element
 void Dlist::Push_Front(const std::string &s){
-	cout << "push front" << endl;
-	
-	Insert_After(s, sentinel);
+	Insert_Before(s, Begin());
 }
 
-//Put new strings on the back of the list
+//Inserts a new node after the last element
 void Dlist::Push_Back(const std::string &s){
-	cout << "push back" << endl;
-	
-	Insert_Before(s, sentinel);
-
-	cout << "done push back" << endl;
+	Insert_After(s, Rbegin());
 }
 
 
 
-
-//Return first element of list
+//Remove and return the first element of the list
 string Dlist::Pop_Front(){
-	//use Erase()
-	cout << "pop front" << endl;
-	Dnode *n = new Dnode;
-	string val;
-
-	n = sentinel->flink;
-	val = n->s;
-
-	Dnode *prev;
-	Dnode *next;
-
-	prev = n->Prev();
-	next = n->Next();
-
-	next->blink = prev->flink;
-	next->flink = prev->blink;
-
-	delete n;
-	size--;
-
-	return val;
+	string temp = Begin()->s;
+	Erase(Begin());	
+	return temp;
 }
 
-//Return last element of list
+//Remove and return the last element of the list
 string Dlist::Pop_Back(){
-	//use Erase()
-	cout << "pop back" << endl;
-	Dnode *n = new Dnode;
-	string val;
-
-	n = sentinel;
-	val = n->s;
-
-	Dnode *prev;
-	Dnode *next;
-
-	prev = n->Prev();
-	next = n->Next();
-
-	next->blink = prev->flink;
-	next->flink = prev->blink;
-
-	delete n;
-	size--;
-
-	return val;
+	string temp = Rbegin()->s;
+	Erase(Rbegin());
+	return temp;
 }
 
 
-
-
-//pointer to the first node on the list
+// Pointer to the first node on the list
 Dnode* Dlist::Begin() const{	
-	return sentinel->flink;
+	return sentinel->flink;	
 }
-
-//Pointer to "one past" the last node of the list
+// Pointer to "one past" the last node on the list.
 Dnode* Dlist::End() const{
 	return sentinel;
 }
-
-//Pointer to the last node on the list
+// Pointer to the last node on the list
 Dnode* Dlist::Rbegin() const{
-	return sentinel->flink;
+	return sentinel->blink;
 }
-
-//Pointer to "one before" the first node on the list
+// Pointer to "one before" the first node on the list.
 Dnode* Dlist::Rend() const{	
 	return sentinel;
 }
 
 
-
-
+//Insert a new node before a given node
 void Dlist::Insert_Before(const std::string &s, Dnode *n){
-	cout << "insert before" << endl;
-	//Dnode *prev;
-	Dnode *newnode = new Dnode;
-
-	cout << "just before" << endl;
-
-	//prev = n->blink;
+	Dnode* prev = n->blink;
+	Dnode* newnode = new Dnode;
 	newnode->s = s;
 
-	cout << "tricky swaps" << endl;
-
+	newnode->blink = prev;
 	newnode->flink = n;
+	prev->flink = newnode;
+	n->blink = newnode;
 
-
-	cout << "half" << endl;
-
-	//n->blink->flink = newnode;
-	//n->blink = newnode->flink;
+	size++;
 }
 
+//Insert a new node after a given node
 void Dlist::Insert_After(const std::string &s, Dnode *n){
-	cout << "insert after" << endl;
-	Dnode *next;
-	Dnode *newnode = new Dnode;
-
-	next = n->flink;
+	Dnode* newnode = new Dnode;
+	Dnode* next = n->flink;
 	newnode->s = s;
 
-	newnode->flink = next->blink;
-	newnode->blink = n->flink;
+	newnode->blink = n;
+	newnode->flink = next;
+	next->blink = newnode;
+	n->flink = newnode;
+
+	size++;
 }
 
+//Delete a node from the list except the sentinel
 void Dlist::Erase(Dnode *n){
-	cout << "erase" << endl;
-	Dnode *prev;
-	Dnode *next;
+	if(n != sentinel){
+		Dnode* prev = n->blink;
+		Dnode* next = n->flink;
 
-	prev = n->Prev();
-	next = n->Next();
+		next->blink = prev;
+		prev->flink = next;
 
-	next->blink = prev->flink;
-	next->flink = prev->blink;
-
-	delete n;
-	size--;
+		delete n;
+		size--;
+	}
 }
