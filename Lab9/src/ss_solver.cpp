@@ -22,6 +22,9 @@ class Shifter{
 		vector <vector <string> > Shapes;	//Shapes in the order in which they appear in standard input
 		vector <int> Solution_Rows;			//Starting row of shapes when finding solution and done
 		vector <int> Solution_Cols;			//Starting col of shapes when finding solution and done
+		
+//		vector <int> tempR;
+//		vector <int> tempC;
 };
 
 
@@ -104,19 +107,19 @@ bool Shifter::Apply_Shape(int index, int r, int c){
 				else if(Shapes[index][i][j] == '1' && Grid[r+i][c+j] == '0')
 					Grid[r+i][c+j] = '1';
 //IMPORTANT
-				cout << "Grid (" << r+i << ", " << c+j << ") = " << Grid[r+i][c+j] << endl;
+//				cout << "Grid (" << r+i << ", " << c+j << ") = " << Grid[r+i][c+j] << endl;
 			}
 		}
 	}
 
 //IMPORTANT	
-	 for(unsigned int i = 0; i < Grid.size(); i++){
+/*	 for(unsigned int i = 0; i < Grid.size(); i++){
 		 for(unsigned int j = 0; j < Grid[0].size(); j++){
 			 cout << Grid[i][j] << " ";
 		 }
 		cout << endl;
 	 }
-
+*/
 	return possible;
 }
 
@@ -134,30 +137,76 @@ bool Shifter::Find_Solution(int index){
 			
 			if(index != (int)Shapes.size())
 //IMPORTNAT				
-				cout << "SHAPE = " << index << endl;
+//				cout << "SHAPE = " << index << endl;
 			
 			if(index < (int)Shapes.size()){	
-				cout << "row: " << row << ", col:" << col << endl;
+//				cout << "row: " << row << ", col:" << col << endl;
 				if(Apply_Shape(index, row, col) == true){
+					//cout << "APPLY_SHAPE IF = " << row << ", " << col << endl;
 					Solution_Rows[index] = row;
 					Solution_Cols[index] = col;
+					
+//					cout << "Solution = " << Solution_Rows[index] << " + " << Solution_Cols[index] << endl;
+//					cout << "the index is " << index << endl;
+					//Solution_Rows.push_back(row);
+					//Solution_Cols.push_back(col);
+			
 					
 					index++;
 									
 					if(!Find_Solution(index)){
-						cout << "\n!Find\n" << endl;
+//						cout << "\n!Find\n" << endl;
+						//tempR.erase(tempR.end()-1);
+						//tempC.erase(tempC.end()-1);
 						index--;
 					}
 					else{
-						Solution_Rows[index] = row;
-						Solution_Cols[index] = col;
-						return true;
+//						cout << "ELSE !FIND" << endl;
+						
+						//cout << Solution_Rows[index] << " - " << Solution_Cols[index] << endl;
+						/*
+						for(unsigned int a = 0; a < tempR.size(); a++){
+							for(unsigned int b = 0; b < tempC.size(); b++){
+								cout << tempR[a] << " " << tempC[b] << endl;
+							}
+						}
+						
+						Solution_Rows[2] = tempR[0];
+						Solution_Cols[2] = tempC[0];
+						
+
+						cout << Solution_Rows[2] << " - " << Solution_Cols[2] << endl;
+
+						//Solution_Rows[index] = tempR[index];
+						//Solution_Cols[index] = tempC[index];
+						*/
+						
+						num_ones = 0;
+						for(unsigned int y = 0; y < Grid.size(); y++){
+							for(unsigned int z = 0; z < Grid[0].size(); z++){
+								num_ones++;
+							}
+						}
+						
+						if(num_ones == (Grid.size() * Grid[0].size())){
+							return true;
+
+						}
+
+						//Solution_Rows.push_back(row);
+						//Solution_Cols.push_back(col);
+
+						//Solution_Rows[index] = row;
+						//Solution_Cols[index] = col;
+						
+						//return true;
 					}
 				}		
 			}
 		}
 	}
 
+//	cout << "outside for loop" << endl;
 	
 	for(unsigned int i = 0; i < Grid.size(); i++){
 		for(unsigned int j = 0; j < Grid[0].size(); j++){
@@ -170,30 +219,39 @@ bool Shifter::Find_Solution(int index){
 	}
 
 	if(num_ones != (Grid.size() * Grid[0].size())){
-		cout << "NOT ALL 1s" << endl << endl;
+//		cout << "NOT ALL 1s" << endl << endl;
 		index--;
 		Apply_Shape(index, Solution_Rows[index], Solution_Cols[index]);
 		return false;
 	}
+	else{
 	
+//	cout << "\nbottom true" << endl;
+//	cout << "Solution = " << Solution_Rows[index-1] << " * " << Solution_Cols[index-1] << endl;
+//	cout << "now the index is " << index-1 << endl;
+	//Solution_Rows[index-1] = Solution_Rows[index-1];
+	//Solution_Cols[index-1] = Solution_Cols[index-1]+1;
 	
-	cout << "\nbottom true" << endl;
-	
+	//tempR.push_back(Solution_Rows[index-1]);
+	//tempC.push_back(Solution_Cols[index-1]);
+
 	return true;
+	}
 }
 
 
 /* 1. This prints the solution on standard output.*/
 void Shifter::Print_Solution() const{
-	int correctCol;
+//	int correctCol;
 //	cout << "I should be printing the solution now" << endl;
 	
+//	cout << Solution_Rows[2] << " % " << Solution_Cols[2] << endl;
+
 	for(unsigned int row = 0; row < Shapes.size(); row++){
 		for(unsigned int col = 0; col < Shapes[row].size(); col++){
-			correctCol = col;
 			cout << Shapes[row][col] << " ";
 		}
-		cout << Solution_Rows[row] << " " << Solution_Cols[correctCol] << endl;
+		cout << Solution_Rows[row] << " " << Solution_Cols[row] << endl;
 	}
 }
 
