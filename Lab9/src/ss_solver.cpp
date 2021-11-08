@@ -13,7 +13,7 @@ using namespace std;
 class Shifter{
 	public:
 		bool Read_Grid_And_Shapes(int argc, const char **argv);
-		void Apply_Shape(int index, int r, int c);
+		bool Apply_Shape(int index, int r, int c);
 		bool Find_Solution(int index);
 		void Print_Solution() const;
 
@@ -60,9 +60,10 @@ bool Shifter::Read_Grid_And_Shapes(int argc, const char **argv){
 		r++;
 	}
 	Shapes.resize(r);
+	Solution_Rows.resize(r);
+	Solution_Cols.resize(r);
 
-	/*
-	for(unsigned int row = 0; row < Shapes.size(); row++){
+/*	for(unsigned int row = 0; row < Shapes.size(); row++){
 		for(unsigned int col = 0; col < Shapes[row].size(); col++){
 			cout << Shapes[row][col] << " ";
 		}
@@ -74,34 +75,49 @@ bool Shifter::Read_Grid_And_Shapes(int argc, const char **argv){
 
 /* 1. Apply_Shape() applies the shape in Shapes[index] to the grid, starting at row r and column c. 
  * 2. If you call Apply_Shape twice with the same arguments, you'll end up with same grid as before the two calls. */
-void Shifter::Apply_Shape(int index, int r, int c){
+bool Shifter::Apply_Shape(int index, int r, int c){
 	(void) index;
 	(void) r;
 	(void) c;
 	bool goodRow = false, goodCol = false;
 	
-	cout << "Apply Shape" << endl;
+	bool possible = false;
+
+	//cout << "Apply Shape" << endl;
 	
 	if(r + Shapes[index].size() <= Grid.size())
 		goodRow = true;
 	if(c + Shapes[index][0].size() <= Grid[0].size())
 		goodCol = true; 
 
-
+	
 	if(goodRow && goodCol){
+		possible = true;
+		
 		for(unsigned int i = 0; i < Shapes[index].size(); i++){
 			for(unsigned int j = 0; j < Shapes[index][i].size(); j++){
+				
 				
 				if(Shapes[index][i][j] == '1' && Grid[r+i][c+j] == '1')
 					Grid[r+i][c+j] = '0';
 
 				else if(Shapes[index][i][j] == '1' && Grid[r+i][c+j] == '0')
 					Grid[r+i][c+j] = '1';
-
+//IMPORTANT
 				cout << "Grid (" << r+i << ", " << c+j << ") = " << Grid[r+i][c+j] << endl;
 			}
 		}
 	}
+
+//IMPORTANT	
+	 for(unsigned int i = 0; i < Grid.size(); i++){
+		 for(unsigned int j = 0; j < Grid[0].size(); j++){
+			 cout << Grid[i][j] << " ";
+		 }
+		cout << endl;
+	 }
+
+	return possible;
 }
 
 
@@ -111,27 +127,73 @@ void Shifter::Apply_Shape(int index, int r, int c){
  * 3. If a recursive call returns false, then it "undoes" the shape by calling Apply_Shape() again.*/
 bool Shifter::Find_Solution(int index){
 	(void) index;
-	cout << "We are now finding the solution" << endl;
-
+	unsigned int num_ones = 0;
+	
 	for(unsigned int row = 0; row < Grid.size(); row++){
 		for(unsigned int col = 0; col < Grid[0].size(); col++){
 			
-			Apply_Shape(index, r, c);
+			if(index != (int)Shapes.size())
+//IMPORTNAT				
+				cout << "SHAPE = " << index << endl;
 			
+			if(index < (int)Shapes.size()){	
+				cout << "row: " << row << ", col:" << col << endl;
+				if(Apply_Shape(index, row, col) == true){
+					Solution_Rows[index] = row;
+					Solution_Cols[index] = col;
+					
+					index++;
+									
+					if(!Find_Solution(index)){
+						cout << "\n!Find\n" << endl;
+						index--;
+					}
+					else{
+						Solution_Rows[index] = row;
+						Solution_Cols[index] = col;
+						return true;
+					}
+				}		
+			}
 		}
 	}
+
+	
+	for(unsigned int i = 0; i < Grid.size(); i++){
+		for(unsigned int j = 0; j < Grid[0].size(); j++){
+			//cout << Grid[i][j] << " ";
+			if(Grid[i][j] == '1'){
+				num_ones++;
+			}
+		}
+		//cout << endl;
+	}
+
+	if(num_ones != (Grid.size() * Grid[0].size())){
+		cout << "NOT ALL 1s" << endl << endl;
+		index--;
+		Apply_Shape(index, Solution_Rows[index], Solution_Cols[index]);
+		return false;
+	}
+	
+	
+	cout << "\nbottom true" << endl;
+	
 	return true;
 }
 
 
 /* 1. This prints the solution on standard output.*/
 void Shifter::Print_Solution() const{
-	cout << "I should be printing the solution now" << endl;
+	int correctCol;
+//	cout << "I should be printing the solution now" << endl;
 	
 	for(unsigned int row = 0; row < Shapes.size(); row++){
 		for(unsigned int col = 0; col < Shapes[row].size(); col++){
-			cout << Shapes[row][col] << " " << Solution_Rows[row] << " " << Solution_Cols[col] << endl;
+			correctCol = col;
+			cout << Shapes[row][col] << " ";
 		}
+		cout << Solution_Rows[row] << " " << Solution_Cols[correctCol] << endl;
 	}
 }
 
@@ -141,10 +203,10 @@ int main(int argc, const char **argv){
 	Shifter shwifty;
 	shwifty.Read_Grid_And_Shapes(argc, argv);
 	
-	cout << "Time to find some solutions!" << endl;
+	//cout << "Time to find some solutions!" << endl;
 	
-	if(shwifty.Find_Solution(0))
-		shwifty.Print_Solution();
+	shwifty.Find_Solution(0);
+	shwifty.Print_Solution();
 	
 	return 0;
 }
