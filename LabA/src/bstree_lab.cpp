@@ -1,16 +1,21 @@
+/* Name: Sarah Huang
+ * Date: 11/23/21
+ * Program: bstree_lab.cpp
+ * Purpose: Simulate a binary search tree.
+*/
+
+
 #include <vector>
 #include <string>
 #include <iostream>
 #include <cstdio>
-#include <set>
 #include "bstree.hpp"
 using namespace std;
 using CS202::BSTree;
 using CS202::BSTNode;
 
-/* ---------------------------------------------- */
-/* You'll write all of these as part of your lab. */
 
+//Distance from a node to the root
 int BSTree::Depth(const string &key) const{
 	(void) key;
 	int distance = 0;
@@ -19,18 +24,20 @@ int BSTree::Depth(const string &key) const{
 	n = sentinel->right;
 
 	while(1){
-		if(n == sentinel) return -1;
+		if(n == sentinel) return -1;		//Key not found in tree
 		if(key == n->key) return distance;
 		n = (key < n->key) ? n->left : n->right;
 		distance++;
 	}
 }
 
+//Returns the depth of the node with maximum depth, plus one.
 int BSTree::Height() const{ 
 	int height = recursive_find_height(sentinel->right) + 1;
 	return height;
 }
 
+//Return a vector of sorted keys
 vector <string> BSTree::Ordered_Keys() const{
 	vector <string> rv;
 	make_key_vector(sentinel->right, rv);
@@ -40,9 +47,9 @@ vector <string> BSTree::Ordered_Keys() const{
 
 
 
+//Copy constructor
 BSTree::BSTree(const BSTree &t) {
 	(void) t;
-
 	sentinel = new BSTNode;
 	sentinel->left = NULL;
 	sentinel->right = sentinel;
@@ -54,40 +61,44 @@ BSTree::BSTree(const BSTree &t) {
 	*this = t;
 }
 
+//Assignment overload
 BSTree& BSTree::operator= (const BSTree &t) {
 	(void) t;
-	
 	Clear();
 	vector <string> ok = t.Ordered_Keys();
 	vector <void *> ov = t.Ordered_Vals();
 	make_balanced_tree(ok, ov, 0, t.Size());
+	
 	return *this;
 }
 
 
 
-
+//Helper for Height()
 int BSTree::recursive_find_height(const BSTNode *n) const{  
 	(void) n;
-	static int maxDepth = 0;
+	static int maxDepth = 0;	//The maximum depth found (static so it doesn't make copies during recursion)
 
+	
 	if(sentinel == n) return -1;
 
 	recursive_find_height(n->left);
 	recursive_find_height(n->right);
 
-	if(Depth(n->key) > maxDepth){
-		maxDepth = Depth(n->key);
-	}	
+	//If the calculated depth is greater than current max depth
+	if(Depth(n->key) > maxDepth)
+		maxDepth = Depth(n->key);	
 
+	//Once we return to base case
 	if(n->parent == sentinel){
 		int temp = maxDepth;
-		maxDepth = 0;
+		maxDepth = 0;	//Must reset static variable for future calls
 		return temp;
 	}
 	return 0;
 }
 
+//Helper for Ordered_Keys()
 void BSTree::make_key_vector(const BSTNode *n, vector<string> &v) const{
 	(void) n;
 	(void) v;
@@ -99,6 +110,7 @@ void BSTree::make_key_vector(const BSTNode *n, vector<string> &v) const{
 	make_key_vector(n->right, v);
 }
 
+//Helper for copy constructor and assignment overload
 BSTNode *BSTree::make_balanced_tree(const vector<string> &sorted_keys, 
 		const vector<void *> &vals,
 		size_t first_index,
@@ -117,9 +129,12 @@ BSTNode *BSTree::make_balanced_tree(const vector<string> &sorted_keys,
 	string key;
 	void * val;
 
+
+	//REWRITE THE MATH
 	
 	//Odd elements
 	if(sorted_keys.size() % 2 != 0){
+		cout << "i am a bit odd :)" << endl;
 		key = sorted_keys.at(first_index + num_indices);	
 		val = vals.at(first_index + num_indices);			
 	}
@@ -127,33 +142,51 @@ BSTNode *BSTree::make_balanced_tree(const vector<string> &sorted_keys,
 	else{
 		//Easy middle element?
 		if(num_indices % 2 != 0){
-			cout << "num indices = "<< num_indices << endl;
-			cout << "first index = " << first_index << endl;
-			cout << "if    SORTED_KEYS.AT() = " << first_index + num_indices/2 << endl;
+			//cout << "num indices = "<< num_indices << endl;
+			//cout << "first index = " << first_index << endl;
+			//cout << "if    SORTED_KEYS.AT() = " << first_index + num_indices/2 << endl;
 			
 			
-			key = sorted_keys.at(first_index + num_indices/2);
-			val = vals.at(first_index + num_indices/2);
-		
+			//key = sorted_keys.at(first_index + num_indices/2);
+			//val = vals.at(first_index + num_indices/2);
+		    cout << "adsf" << endl;
+			cout << "first=" << first_index << "  num=" << num_indices << endl;
+			//first_index = first_index + num_indices;
+
+			cout << "if    SORTED_KEYS.AT() = " << first_index << endl;
+
+			 key = sorted_keys.at(first_index);
+			 val = vals.at(first_index);
+			 //cout << "if    SORTED_KEYS.AT() = " << first_index << endl;
 		}
 
 		//Comparing two elements
 		else{
-			cout << "else if	SORTED_KEYS.AT() = " << first_index + num_indices/2 - 1 << endl;
-			cout << "else if2    SORTED_KEYS.AT() = " << first_index + num_indices/2 << endl;
+			//cout << "else if	SORTED_KEYS.AT() = " << first_index + num_indices/2 - 1 << endl;
+			//cout << "else if2    SORTED_KEYS.AT() = " << first_index + num_indices/2 << endl;
 			
+			cout << "the else" << endl;
+			cout << "first=" << first_index << "  num=" << num_indices << endl;
+
 			if(sorted_keys.at(first_index + num_indices/2 - 1) > sorted_keys.at(first_index + num_indices/2)){
-				key = sorted_keys.at(first_index + num_indices/2 - 1);
-				val = vals.at(first_index + num_indices/2 - 1);
+				first_index = num_indices/2 - 1;
+				key = sorted_keys.at(first_index);
+				val = vals.at(first_index);
 			}
 			else{
-				key = sorted_keys.at(first_index + num_indices/2);
-				val = vals.at(first_index + num_indices/2);
+				first_index = num_indices/2;
+				 key = sorted_keys.at(first_index);
+				 val = vals.at(first_index);
+				
+				//key = sorted_keys.at(first_index + num_indices/2);
+				//val = vals.at(first_index + num_indices/2);
 			}
+			cout << "else     SORTED_KEYS.AT() = " << first_index << endl;
+			//cout << "else if2    SORTED_KEYS.AT() = " << first_index + num_indices/2 << endl;
 		}
 	}
 	
-	cout << "\nKEY=" << key << endl;
+	cout << "KEY=" << key << endl;
 
 
 
@@ -188,11 +221,12 @@ BSTNode *BSTree::make_balanced_tree(const vector<string> &sorted_keys,
 	
 	
 	c++;
-	cout << "first=" << first_index << "	num=" << num_indices << endl;
-	cout << "num/2 = " << num_indices/2 << endl;
-	cout << "first_index + num + 1 = " << first_index + num_indices + 1 << endl << endl << endl;
-	//cout << "C IS " << c  << endl;
-	
+	//cout << "first=" << first_index << "	num=" << num_indices << endl;
+	//cout << "num/2 = " << num_indices/2 << endl;
+	//cout << "first_index + num + 1 = " << first_index + num_indices + 1 << endl << endl << endl;
+	cout << "C IS " << c  << endl;
+	cout << "first=" << first_index << "  num=" << num_indices << endl;
+
 	if(c != sorted_keys.size()){
 		//Odd elements
 		if(sorted_keys.size() % 2 != 0 && num_indices/2 != 0){
@@ -201,15 +235,23 @@ BSTNode *BSTree::make_balanced_tree(const vector<string> &sorted_keys,
 		}
 		//Even elements
 		else if(sorted_keys.size() % 2 == 0 && num_indices/2 != 0){
-			make_balanced_tree(sorted_keys, vals, first_index, num_indices/2);
+			cout << "recursion time" << endl;
+			cout << "first=" << first_index << "    num=" << num_indices << endl;
+
+			make_balanced_tree(sorted_keys, vals, first_index/num_indices, num_indices/2);
 			
-			make_balanced_tree(sorted_keys, vals, first_index + num_indices/2 + 1, num_indices/2);
-			//cout << "num=" << num_indices << endl;
+			cout << "\n\nTIME FOR THE 2nd STATEMENT!" << endl;
+			if(c == sorted_keys.size())
+				return n;
+			else
+				make_balanced_tree(sorted_keys, vals, first_index + c/2, num_indices/2);
+			
 		}
 	}
-	else{
-		c = 0;
-	}
+//	else{
+//		cout << "i zero" << endl;
+	//	c = 0;	
+//	}
 
 	//cout << "c = " << c << endl;
 	return n;
