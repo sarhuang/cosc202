@@ -55,14 +55,9 @@ BSTree::BSTree(const BSTree &t) {
 }
 
 BSTree& BSTree::operator= (const BSTree &t) {
-	//call Ordered_Keys()
-	//call Ordered_Vals()
-	//call make_balanced_tree()
-
 	(void) t;
-
+	
 	Clear();
-
 	vector <string> ok = t.Ordered_Keys();
 	vector <void *> ov = t.Ordered_Vals();
 	make_balanced_tree(ok, ov, 0, t.Size());
@@ -84,9 +79,6 @@ int BSTree::recursive_find_height(const BSTNode *n) const{
 	if(Depth(n->key) > maxDepth){
 		maxDepth = Depth(n->key);
 	}	
-
-	//cout << "MAX DEPTH = " << maxDepth << endl;
-
 
 	if(n->parent == sentinel){
 		int temp = maxDepth;
@@ -117,81 +109,56 @@ BSTNode *BSTree::make_balanced_tree(const vector<string> &sorted_keys,
 	(void) first_index;
 	(void) num_indices;
 	static size_t c = 0;
-	static int i = 0;
-	static set <string> used;
-	set <string>::iterator it;
-	
+
+
 	//individually create nodes & connect manually
 	BSTNode *parent;
 	BSTNode *n;
 	string key;
 	void * val;
 
-	//parent = sentinel;
-	//n = sentinel->right;
 	
-
-	if(sorted_keys.size() % 2 != 0 && num_indices <= sorted_keys.size() && (first_index+num_indices/2) < sorted_keys.size()){
-		key = sorted_keys.at(first_index + num_indices/2);	//FIX HERE
-		//val = vals.at(first_index + num_indices/2);			//FIX HERE
-	
-		it = used.find(key);
-		if(it == used.end()){
-			val = vals.at(first_index + num_indices/2);
-			used.insert(key);
-		}
-		else
-			key = "";
+	//Odd elements
+	if(sorted_keys.size() % 2 != 0){
+		key = sorted_keys.at(first_index + num_indices);	
+		val = vals.at(first_index + num_indices);			
 	}
+	//Even elements
 	else{
-		if(num_indices % 2 != 0 && (first_index+num_indices/2) < sorted_keys.size()){
-			key = sorted_keys.at(first_index + num_indices/2);
-			//val = vals.at(first_index + num_indices/2);
+		//Easy middle element?
+		if(num_indices % 2 != 0){
+			cout << "num indices = "<< num_indices << endl;
+			cout << "first index = " << first_index << endl;
+			cout << "if    SORTED_KEYS.AT() = " << first_index + num_indices/2 << endl;
 			
-			it = used.find(key);
-			if(it == used.end()){
-				val = vals.at(first_index + num_indices/2);
-				used.insert(key);
-			}
-			else
-				key = "";
+			
+			key = sorted_keys.at(first_index + num_indices/2);
+			val = vals.at(first_index + num_indices/2);
+		
 		}
-		else if((num_indices/2 - 1) < sorted_keys.size() && (num_indices/2) < sorted_keys.size()){
-			if(sorted_keys.at(num_indices/2 - 1) > sorted_keys.at(num_indices/2)){
-				key = sorted_keys.at(num_indices/2 - 1);
-				//val = vals.at(num_indices/2 - 1);
-				
-				it = used.find(key);
-				if(it == used.end()){
-					val = vals.at(num_indices/2 - 1);
-					used.insert(key);
-				}
-				else
-					key = "";
+
+		//Comparing two elements
+		else{
+			cout << "else if	SORTED_KEYS.AT() = " << first_index + num_indices/2 - 1 << endl;
+			cout << "else if2    SORTED_KEYS.AT() = " << first_index + num_indices/2 << endl;
+			
+			if(sorted_keys.at(first_index + num_indices/2 - 1) > sorted_keys.at(first_index + num_indices/2)){
+				key = sorted_keys.at(first_index + num_indices/2 - 1);
+				val = vals.at(first_index + num_indices/2 - 1);
 			}
 			else{
-				key = sorted_keys.at(num_indices/2);
-				//val = vals.at(num_indices/2);
-				
-				it = used.find(key);
-				if(it == used.end()){
-					val = vals.at(num_indices/2);
-					used.insert(key);
-				}
-				else
-					key = "";
+				key = sorted_keys.at(first_index + num_indices/2);
+				val = vals.at(first_index + num_indices/2);
 			}
 		}
 	}
 	
-	cout << "KEY=" << key << endl;
+	cout << "\nKEY=" << key << endl;
 
 
 
-
-	if(key != ""){
-		parent = sentinel;
-		n = sentinel->right;
+	parent = sentinel;
+	n = sentinel->right;
 	
 
 	//Find where key should go.
@@ -218,37 +185,32 @@ BSTNode *BSTree::make_balanced_tree(const vector<string> &sorted_keys,
 	else 
 		parent->right = n;
 
-
-	c++;
-	i = 0;
-	}
-	else 
-		i++;
 	
-
-
-
-	//if(c != sorted_keys.size() && num_indices/2 != 0){
+	
+	c++;
+	cout << "first=" << first_index << "	num=" << num_indices << endl;
+	cout << "num/2 = " << num_indices/2 << endl;
+	cout << "first_index + num + 1 = " << first_index + num_indices + 1 << endl << endl << endl;
+	//cout << "C IS " << c  << endl;
+	
 	if(c != sorted_keys.size()){
-	//	cout << "first_index=" << first_index << "		num_indices=" << num_indices << endl;
-
-		//if(num_indices/2 != 0){
+		//Odd elements
 		if(sorted_keys.size() % 2 != 0 && num_indices/2 != 0){
 			make_balanced_tree(sorted_keys, vals, first_index, num_indices/2);
 			make_balanced_tree(sorted_keys, vals, first_index + num_indices/2 + 1, num_indices/2);
 		}
+		//Even elements
 		else if(sorted_keys.size() % 2 == 0 && num_indices/2 != 0){
 			make_balanced_tree(sorted_keys, vals, first_index, num_indices/2);
-
-
-	//		cout << "\nAFTER	first_index=" << first_index << "      num_indices=" << num_indices << endl;
 			
-			
-			make_balanced_tree(sorted_keys, vals, first_index, num_indices + c + i);
+			make_balanced_tree(sorted_keys, vals, first_index + num_indices/2 + 1, num_indices/2);
+			//cout << "num=" << num_indices << endl;
 		}
 	}
+	else{
+		c = 0;
+	}
 
-
-	//cout << "first_index=" << first_index << "		num_indices=" << num_indices << endl;
+	//cout << "c = " << c << endl;
 	return n;
 }
