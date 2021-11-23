@@ -120,86 +120,55 @@ BSTNode *BSTree::make_balanced_tree(const vector<string> &sorted_keys,
 	(void) vals;
 	(void) first_index;
 	(void) num_indices;
-	static size_t c = 0;
 
-
-	//individually create nodes & connect manually
 	BSTNode *parent;
 	BSTNode *n;
-	string key;
-	void * val;
+	string key;				
+	void * val;			
+	static size_t c = 0;	//Counter to check current size of tree
+
+	cout << "make_balanced_tree(keys, vals, " << first_index << ", " << num_indices << ")" << endl;
 
 
-	//REWRITE THE MATH
-	
-	//Odd elements
-	if(sorted_keys.size() % 2 != 0){
-		cout << "i am a bit odd :)" << endl;
-		key = sorted_keys.at(first_index + num_indices);	
-		val = vals.at(first_index + num_indices);			
+	if(num_indices % 2 != 0){		
+		if(first_index + num_indices/2 >= sorted_keys.size()){
+			cout << "succ" << endl;
+			first_index--;
+		}
+		key = sorted_keys.at(first_index + num_indices/2);	
+		val = vals.at(first_index + num_indices/2);			
 	}
-	//Even elements
 	else{
-		//Easy middle element?
-		if(num_indices % 2 != 0){
-			//cout << "num indices = "<< num_indices << endl;
-			//cout << "first index = " << first_index << endl;
-			//cout << "if    SORTED_KEYS.AT() = " << first_index + num_indices/2 << endl;
-			
-			
-			//key = sorted_keys.at(first_index + num_indices/2);
-			//val = vals.at(first_index + num_indices/2);
-		    cout << "adsf" << endl;
-			cout << "first=" << first_index << "  num=" << num_indices << endl;
-			//first_index = first_index + num_indices;
+		cout << "even elements oh no!" << endl;
+		int temp = first_index + num_indices/2;
+		
+		cout << "(temp-1)= " << sorted_keys.at(temp-1) << "		VS		(temp)=" << sorted_keys.at(temp) << endl;
 
-			cout << "if    SORTED_KEYS.AT() = " << first_index << endl;
 
-			 key = sorted_keys.at(first_index);
-			 val = vals.at(first_index);
-			 //cout << "if    SORTED_KEYS.AT() = " << first_index << endl;
+		if(sorted_keys.at(temp) > sorted_keys.at(temp-1)){
+			key = sorted_keys.at(temp);
+			val = vals.at(temp);
 		}
-
-		//Comparing two elements
 		else{
-			//cout << "else if	SORTED_KEYS.AT() = " << first_index + num_indices/2 - 1 << endl;
-			//cout << "else if2    SORTED_KEYS.AT() = " << first_index + num_indices/2 << endl;
-			
-			cout << "the else" << endl;
-			cout << "first=" << first_index << "  num=" << num_indices << endl;
-
-			if(sorted_keys.at(first_index + num_indices/2 - 1) > sorted_keys.at(first_index + num_indices/2)){
-				first_index = num_indices/2 - 1;
-				key = sorted_keys.at(first_index);
-				val = vals.at(first_index);
-			}
-			else{
-				first_index = num_indices/2;
-				 key = sorted_keys.at(first_index);
-				 val = vals.at(first_index);
-				
-				//key = sorted_keys.at(first_index + num_indices/2);
-				//val = vals.at(first_index + num_indices/2);
-			}
-			cout << "else     SORTED_KEYS.AT() = " << first_index << endl;
-			//cout << "else if2    SORTED_KEYS.AT() = " << first_index + num_indices/2 << endl;
+			key = sorted_keys.at(temp - 1);
+			val = vals.at(temp - 1);
 		}
 	}
 	
-	cout << "KEY=" << key << endl;
+
+
+	cout << "KEY=" << key << endl << endl;
 
 
 
 	parent = sentinel;
 	n = sentinel->right;
-	
 
 	//Find where key should go.
 	while(n != sentinel){
 		parent = n;
 		n = (key < n->key) ? n->left : n->right;
 	}
-
 
 	//Create new node and hook it in
 	n = new BSTNode;
@@ -208,7 +177,6 @@ BSTNode *BSTree::make_balanced_tree(const vector<string> &sorted_keys,
 	n->parent = parent;
 	n->left = sentinel;
 	n->right = sentinel;
-
 	
 	//Use correct pointer in parent to point to new node
 	if (parent == sentinel) 
@@ -221,38 +189,32 @@ BSTNode *BSTree::make_balanced_tree(const vector<string> &sorted_keys,
 	
 	
 	c++;
-	//cout << "first=" << first_index << "	num=" << num_indices << endl;
-	//cout << "num/2 = " << num_indices/2 << endl;
-	//cout << "first_index + num + 1 = " << first_index + num_indices + 1 << endl << endl << endl;
-	cout << "C IS " << c  << endl;
-	cout << "first=" << first_index << "  num=" << num_indices << endl;
+	cout << "C: " << c << endl;
+	cout << "make_balanced_tree(keys, vals, " << first_index << ", " << num_indices << ")" << endl;
 
-	if(c != sorted_keys.size()){
+	if(c != sorted_keys.size() && num_indices/2 != 0){
 		//Odd elements
-		if(sorted_keys.size() % 2 != 0 && num_indices/2 != 0){
-			make_balanced_tree(sorted_keys, vals, first_index, num_indices/2);
-			make_balanced_tree(sorted_keys, vals, first_index + num_indices/2 + 1, num_indices/2);
+	//	if(first_index == 0)
+			make_balanced_tree(sorted_keys, vals, first_index, num_indices/2);		
+		
+		cout << "SECOND RECURSION" << endl;
+		cout << "(" << first_index << ", " << num_indices << ")" << endl;
+	
+		if(c == sorted_keys.size()){
+			cout << "we at the end!" << endl;
+			c = 0;
+			return n;
 		}
-		//Even elements
-		else if(sorted_keys.size() % 2 == 0 && num_indices/2 != 0){
-			cout << "recursion time" << endl;
-			cout << "first=" << first_index << "    num=" << num_indices << endl;
-
-			make_balanced_tree(sorted_keys, vals, first_index/num_indices, num_indices/2);
-			
-			cout << "\n\nTIME FOR THE 2nd STATEMENT!" << endl;
-			if(c == sorted_keys.size())
-				return n;
-			else
-				make_balanced_tree(sorted_keys, vals, first_index + c/2, num_indices/2);
-			
+		else{
+			if(num_indices % 2 != 0){
+				cout << "odd" << endl;
+				make_balanced_tree(sorted_keys, vals, first_index + num_indices/2 + 1, num_indices/2);
+			}
+			else{
+				cout << "even" << endl;
+				make_balanced_tree(sorted_keys, vals, first_index + num_indices/2, num_indices/2);
+			}
 		}
 	}
-//	else{
-//		cout << "i zero" << endl;
-	//	c = 0;	
-//	}
-
-	//cout << "c = " << c << endl;
 	return n;
 }
