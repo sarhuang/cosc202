@@ -67,8 +67,12 @@ BSTree& BSTree::operator= (const BSTree &t) {
 	Clear();
 	vector <string> ok = t.Ordered_Keys();
 	vector <void *> ov = t.Ordered_Vals();
-	make_balanced_tree(ok, ov, 0, t.Size());
-	
+
+	//if(t.Size()%2 != 0)
+	//	make_balanced_tree(ok, ov, 0, t.Size()-1);
+	//else
+		make_balanced_tree(ok, ov, 0, t.Size()-1);
+
 	return *this;
 }
 
@@ -126,38 +130,30 @@ BSTNode *BSTree::make_balanced_tree(const vector<string> &sorted_keys,
 	string key;				
 	void * val;			
 	static size_t c = 0;	//Counter to check current size of tree
+	int mid;
 
-	cout << "make_balanced_tree(keys, vals, " << first_index << ", " << num_indices << ")" << endl;
 
 
-	if(num_indices % 2 != 0){		
-		if(first_index + num_indices/2 >= sorted_keys.size()){
-			cout << "succ" << endl;
-			first_index--;
-		}
-		key = sorted_keys.at(first_index + num_indices/2);	
-		val = vals.at(first_index + num_indices/2);			
+
+
+	cout << "START	make_balanced_tree(keys, vals, " << first_index << ", " << num_indices << ")" << endl;
+	
+	if((first_index < num_indices && num_indices > sorted_keys.size()) || first_index > num_indices){
+		cout << "null time" << endl << endl;
+		return NULL;
 	}
-	else{
-		cout << "even elements oh no!" << endl;
-		int temp = first_index + num_indices/2;
-		
-		cout << "(temp-1)= " << sorted_keys.at(temp-1) << "		VS		(temp)=" << sorted_keys.at(temp) << endl;
 
-
-		if(sorted_keys.at(temp) > sorted_keys.at(temp-1)){
-			key = sorted_keys.at(temp);
-			val = vals.at(temp);
-		}
-		else{
-			key = sorted_keys.at(temp - 1);
-			val = vals.at(temp - 1);
-		}
-	}
 	
 
+	mid = (first_index + num_indices)/2;
+	key = sorted_keys.at(mid);
+	val = vals.at(mid);
+	
 
-	cout << "KEY=" << key << endl << endl;
+	cout << "			KEY=" << key << endl;
+
+
+
 
 
 
@@ -188,33 +184,31 @@ BSTNode *BSTree::make_balanced_tree(const vector<string> &sorted_keys,
 
 	
 	
+
+
+
 	c++;
 	cout << "C: " << c << endl;
-	cout << "make_balanced_tree(keys, vals, " << first_index << ", " << num_indices << ")" << endl;
+	cout << "mid = " << mid << endl << endl;
 
-	if(c != sorted_keys.size() && num_indices/2 != 0){
-		//Odd elements
-	//	if(first_index == 0)
-			make_balanced_tree(sorted_keys, vals, first_index, num_indices/2);		
-		
-		cout << "SECOND RECURSION" << endl;
-		cout << "(" << first_index << ", " << num_indices << ")" << endl;
 	
-		if(c == sorted_keys.size()){
-			cout << "we at the end!" << endl;
-			c = 0;
-			return n;
-		}
-		else{
-			if(num_indices % 2 != 0){
-				cout << "odd" << endl;
-				make_balanced_tree(sorted_keys, vals, first_index + num_indices/2 + 1, num_indices/2);
-			}
-			else{
-				cout << "even" << endl;
-				make_balanced_tree(sorted_keys, vals, first_index + num_indices/2, num_indices/2);
-			}
-		}
-	}
+	
+	
+	if(c != sorted_keys.size()){	
+		cout << "1st recursion		(first_index, mid)=" << first_index << ", " << mid << endl;
+		
+		make_balanced_tree(sorted_keys, vals, first_index, mid-1);
+
+
+		cout << "RIGHT SIDE" << endl;
+		cout << "current	(keys, vals, first, num)=" << first_index << ", " << num_indices << ")" << endl;
+		cout << "mid=" << mid << endl;
+	
+		make_balanced_tree(sorted_keys, vals, mid+1, num_indices);
+	}	
+	
+	if(c == sorted_keys.size())
+		c = 0;
+
 	return n;
 }
