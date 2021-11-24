@@ -1,7 +1,8 @@
 /* Name: Sarah Huang
  * Date: 11/23/21
  * Program: bstree_lab.cpp
- * Purpose: Simulate a binary search tree.
+ * Purpose: Simulate a binary search tree. 
+ *			Y'know it's okay to take some Ls. It's hard to stay motivated near the end.
 */
 
 
@@ -64,14 +65,11 @@ BSTree::BSTree(const BSTree &t) {
 //Assignment overload
 BSTree& BSTree::operator= (const BSTree &t) {
 	(void) t;
-	Clear();
 	vector <string> ok = t.Ordered_Keys();
 	vector <void *> ov = t.Ordered_Vals();
 
-	//if(t.Size()%2 != 0)
-	//	make_balanced_tree(ok, ov, 0, t.Size()-1);
-	//else
-		make_balanced_tree(ok, ov, 0, t.Size()-1);
+	Clear();
+	make_balanced_tree(ok, ov, 0, t.Size()-1);
 
 	return *this;
 }
@@ -131,36 +129,21 @@ BSTNode *BSTree::make_balanced_tree(const vector<string> &sorted_keys,
 	void * val;			
 	static size_t c = 0;	//Counter to check current size of tree
 	int mid;
-
-
-
-
-
-	cout << "START	make_balanced_tree(keys, vals, " << first_index << ", " << num_indices << ")" << endl;
 	
+	
+
 	if((first_index < num_indices && num_indices > sorted_keys.size()) || first_index > num_indices){
-		cout << "null time" << endl << endl;
 		return NULL;
 	}
-
-	
 
 	mid = (first_index + num_indices)/2;
 	key = sorted_keys.at(mid);
 	val = vals.at(mid);
 	
 
-	cout << "			KEY=" << key << endl;
-
-
-
-
-
-
+	//Find where key should go.
 	parent = sentinel;
 	n = sentinel->right;
-
-	//Find where key should go.
 	while(n != sentinel){
 		parent = n;
 		n = (key < n->key) ? n->left : n->right;
@@ -183,30 +166,13 @@ BSTNode *BSTree::make_balanced_tree(const vector<string> &sorted_keys,
 		parent->right = n;
 
 	
-	
 
-
-
-	c++;
-	cout << "C: " << c << endl;
-	cout << "mid = " << mid << endl << endl;
-
-	
-	
-	
-	if(c != sorted_keys.size()){	
-		cout << "1st recursion		(first_index, mid)=" << first_index << ", " << mid << endl;
-		
+	c++;	
+	if(c < sorted_keys.size()){	
 		make_balanced_tree(sorted_keys, vals, first_index, mid-1);
+		make_balanced_tree(sorted_keys, vals, mid+1, num_indices);	
+	}
 
-
-		cout << "RIGHT SIDE" << endl;
-		cout << "current	(keys, vals, first, num)=" << first_index << ", " << num_indices << ")" << endl;
-		cout << "mid=" << mid << endl;
-	
-		make_balanced_tree(sorted_keys, vals, mid+1, num_indices);
-	}	
-	
 	if(c == sorted_keys.size())
 		c = 0;
 
