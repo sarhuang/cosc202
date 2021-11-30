@@ -136,8 +136,8 @@ void fix_imbalance(AVLNode *n){
 		//second rotation
 		g->parent = n;
 		g->right = n->left;
-		g->height--;
-
+		g->height--; 
+		
 		if(gg->right == g)
 			gg->right = n;
 		else
