@@ -21,41 +21,41 @@ bool imbalance(const AVLNode *n){
 	(void) n;
 	
 	int diff = n->left->height - n->right->height;
-	//cout << n->left->height << " - " << n->right->height << " = " << diff << endl;
-
+	cout << "IMBALANCE CHECK: " << n->left->height << " - " << n->right->height << " = " << diff << endl;
 	if(diff < -1 || diff > 1){
-		cout << "wow that's an imbalance" << endl;
+		cout << "YES imbalance" << endl;
 		return true;
 	}
-	else
+	else{
 		return false;
+	}
 }
 
 
 void fix_height(AVLNode *n){
-	cout << "time to fix height" << endl;
+	cout << "\nfix_height START" << endl;
 	
 	while(n->key != "---SENTINEL---"){
-		if(n->left != NULL || n->right != NULL){
-	
-			
-			
+		if(n->left != NULL || n->right != NULL){	//Has at least a child
 			int diff = n->left->height - n->right->height;
 			cout << "	" << n->left->height << " - " << n->right->height << " = " << diff << endl;
 
+			//Increases the heights of the children until the difference is 0 or 1
 			while(diff < -1 || diff > 1){
 				if(diff < -1){
 					cout << "diff < -1" << endl;
 					n->left->height++;
+					cout << n->left->key << " = " << n->left->height << endl;
 				}
 				else if(diff > 1){
 					cout << "diff > 1" << endl;
 					n->right->height++;
+					cout << n->right->key << " = " << n->right->height << endl;
 				}
 				diff = n->left->height - n->right->height;
 			}
 
-			
+			//Increases the node's height until it is greater than the children by 1
 			while(n->height <= n->left->height || n->height <= n->right->height){
 				n->height++;
 				cout << "now " << n->key << " height = " << n->height << endl;
@@ -64,118 +64,155 @@ void fix_height(AVLNode *n){
 					break;
 			}
 		}
-
-
-		cout << "	KEY " <<  n->key << ":	" << n->height << endl;
+		cout << "NEW HEIGHT	KEY " <<  n->key << ":	" << n->height << endl;
 		n = n->parent;
 	}
-	cout << "i'm done with height" << endl;
+	cout << "fix_height END" << endl;
 }
 
 
-void fix_imbalance(AVLNode *n){
-	cout << "FiX ImBaLaNcE" << endl;
+void fix_imbalance(AVLNode *n, string choice){
+	cout << "\nFiX ImBaLaNcE" << endl;
 	//AVLNode *n = node itself
 	AVLNode *p = n->parent;
-	AVLNode *g = n->parent->parent;
-	AVLNode *gg = n->parent->parent->parent;
-
+	AVLNode *g = p->parent;
 
 	cout << "n = " << n->key << endl;
 	cout << "p = " << p->key << endl;
 	cout << "g = " << g->key << endl;
-	cout << "gg = " << gg->key << endl;
+	
 
-	//zig zig one direction
-	if(p->right == n && g->right == p){
-		cout << "zig zig LEFT" << endl;
-		g->parent = p;
-		g->right = p->left;
-		g->height--;
+	//zig zig left
+	if(choice == "zigzig_l"){
+		cout << g->left->key << endl;
+		cout << g->left->right->key << endl;
+		cout << g->left->right->right->key << endl;
+		cout << g->left->right->right->right->key << endl;
 
-		if(gg->right == g)
-			gg->right = p;
+		cout << "\nzig zig LEFT" << endl;
+		p->parent = n;
+		p->right = n->left;
+		p->height--;
+
+		if(g->right == p)
+			g->right = n;
 		else
-			gg->left = p;
-		p->parent = gg;
-		p->left = g;
+			g->left = n;
+		n->parent = g;
+		n->left = p;
 	}	
-	//zig zig other direction
-	else if(p->left == n && g->left == p){
-		cout << "zig zig RIGHT" << endl;
-		g->parent = p;
-		g->left = p->right;
-		g->height--;
+	//zig zig right
+	if(choice == "zigzig_r"){
+		cout << "\nzig zig RIGHT" << endl;
+		p->parent = n;
+		p->left = n->right;
+		p->height--;
 
-		if(gg->right == g){
+		if(g->right == p){
 			cout << "----GO	RIGHT!-------" << endl;
-			gg->right = p;
+			g->right = n;
 		}
 		else{
 			cout << "WE ARE GOING LEFT I REPEAT GOING LEFT" << endl;
-			gg->left = p;
+			g->left = n;
 		}
-		p->parent = gg;
-		p->right = g;
+		n->parent = g;
+		n->right = p;
 	}
 
 
-	//zig zag one direction
-	else if(p->left == n && g->right == p){
-		cout << "zig ZAG right left" << endl;
+	//zig zag right left
+	else if(choice == "zigzag_rl"){
+		cout << "\nzig ZAG right left" << endl;
 	
 		//first rotation
 		p->parent = n;
 		p->left = n->right;
-		p->height--;
 		
 		g->right = n;
 		n->parent = g;
 		n->right = p;
 
+		p->height--;
+
 		//second rotation
-		g->parent = n;
-		g->right = n->left;
-		g->height--; 
+		p = n->parent;
+		g = p->parent;
+		cout << n->key << " (n)  NEW " << endl;
+		cout << p->key << " (p)  NEW " << endl; 
+		cout << g->key << " (g)  NEW" << endl;  
+
+		p->parent = n;
+		p->right = n->left;
 		
-		if(gg->right == g)
-			gg->right = n;
-		else
-			gg->left = n;
-		n->parent = gg;
-		n->left = g;
+		if(g->height != 0){
+			cout << "g->right->key = " << g->right->key << endl;
+			cout << "g->left->key = " << g->left->key << endl;
+		
+			if(g->right->key == p->key){
+				cout << "	g->right == n" << endl;
+				g->right = n;
+			}
+			else
+				g->left = n;
+		}
+		else	//SENTINEL
+			g->right = n;
+
+	
+		n->parent = g;
+		n->left = p;
+		p->height--;
+
 	}
 
-	//zig zag other direction
-	else if(p->right == n && g->left == p){
-		cout << "zig ZAG left right" << endl;
+	//zig zag left right
+	if(choice == "zigzag_lr"){
+		cout << "\nzig ZAG left right" << endl;
 		
 		//first rotation
 		p->parent = n;
 		p->right = n->left;
-		p->height--;
-
+		
 		g->left = n;
 		n->parent = g;
 		n->left = p;
 
+		p->height--;
+
+
 		//second rotation
-		g->parent = n;
-		g->left = n->right;
-		g->height--;
+		p = n->parent;
+		g = p->parent;
+		cout << n->key << " (n)  NEW " << endl;
+		cout << p->key << " (p)  NEW " << endl;	//11
+		cout << g->key << " (g)  NEW" << endl;	//5
+		
 
-		if(gg->right == g)
-			gg->right = n;
+		p->parent = n;
+		p->left = n->right;
+
+		if(g->height != 0){
+			cout << "g->right->key = " << g->right->key << endl;
+			cout << "g->left->key = " << g->left->key << endl;
+
+			if(g->right->key == p->key){
+				cout << "	g->right == n" << endl;
+				g->right = n;
+			}
+			else{
+				cout << "	g->left == n" << endl;
+				g->left = n;
+			}
+		}
 		else
-			gg->left = n;
-		n->parent = gg;
-		n->right = g;
-	}
+			g->right = n;
 
-	cout << n->key << " (n)  height = " << n->height << endl;
-	cout << p->key << " (p)  height = " << p->height << endl;
-	cout << g->key << " (g)  height = " << g->height << endl;
-	cout << gg->key << " (gg) height = " << gg->height << endl;
+		n->parent = g;
+		n->right = p;
+
+		p->height--;
+	}
 }
 
 
@@ -231,30 +268,81 @@ bool AVLTree::Insert(const string &key, void *val){
 
 
 
-	AVLNode *temp = n;
-
-	//Imbalance
-	n = n->parent;
-	while(n != sentinel){	
+	
+	//My code
+	AVLNode *prevprev = n;
+	int counter = 1;
+	n = n->parent;	//REMEMBER WE START AT THE PARENT OF THE NEW NODE
+	
+	while(n != sentinel){	//Goes all the way to the top
 		if(imbalance(n)){
-			fix_imbalance(temp);
-			fix_height(n);
+			cout << "	NODE " << n->key << " = " << n->height << endl;
+			cout << "	RIGHT " << n->right->key << " = " << n->right->height << endl;
+			cout << "	LEFT " << n->left->key << " = " << n->left->height << endl;
+			cout << "	PARENT " << n->parent->key << " = " << n->parent->height << endl;
+			cout << "	prevprev " << prevprev->key << " = " << prevprev->height << endl;
+
+			//prevprev->key doesn't always work
+			if(n->height == n->left->height && (n->height - n->left->right->height == 1)){
+				cout << "zigzag_lr" << endl;
+				fix_imbalance(n->left->right, "zigzag_lr");
+			}
+			
+			else if(n->height == n->right->height && (n->height - n->right->left->height == 1)){
+				cout << "zigzag_rl" << endl;
+				fix_imbalance(n->right->left, "zigzag_rl");
+			}
+			
+			
+			//HOW CAN I DIFFERENTIATE ZIG ZIG LEFT AND RIGHT?
+			else if((n->left->height == 0 && n->right->left->height == 0)){
+				cout << "zigzig_l" << endl;
+				if(n->left->height == 0){
+					cout << "i can only do n->right" << endl;
+					fix_imbalance(n->right, "zigzig_l");
+				}
+				else
+					fix_imbalance(n->left, "zigzig_l");
+			}
+			else if(n->key < sentinel->right->key){
+				cout << "also zigzig_l" << endl;
+				if(n->left->height == 0)
+					fix_imbalance(n->right, "zigzig_l");
+				else
+					fix_imbalance(n->left, "zigzig_l");
+			}
+
+			//Just let else be right so less brainpower
+			else{
+				cout << "zigzig_r" << endl;
+				if(n->right->height == 0){
+					cout << "no choice but to do n->left" << endl;
+					fix_imbalance(n->left, "zigzig_r");
+				}
+				else
+					fix_imbalance(n->right, "zigzig_r");
+			}
+			
+			fix_height(prevprev);
 			break;
 		}
 		else{
+			//Increases the height until it is greater than children by 1
+			//This code is in fix_height but this is for not imbalanced nodes
 			while(n->height <= n->left->height || n->height <= n->right->height){
 				n->height++;
-				cout << "now " << n->key << " height = " << n->height << endl;
+				cout << "NO IMBALANCE - now " << n->key << " height = " << n->height << endl;
 
+				//If it's the right height and there is only one child node (the other is always 0)
 				if(n->height > n->left->height || n->height > n->right->height)
 					break;
 			}
-
+			if(counter % 2 == 0)
+				prevprev = n;
 			n = n->parent;
 		}
-
 	}
-
+	cout << endl << endl;
 	return true;
 }
 
