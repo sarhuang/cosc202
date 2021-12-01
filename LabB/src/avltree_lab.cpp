@@ -84,10 +84,11 @@ void fix_imbalance(AVLNode *n, string choice){
 
 	//zig zig left
 	if(choice == "zigzig_l"){
-		cout << g->left->key << endl;
+		/*cout << g->left->key << endl;
 		cout << g->left->right->key << endl;
 		cout << g->left->right->right->key << endl;
 		cout << g->left->right->right->right->key << endl;
+		*/
 
 		cout << "\nzig zig LEFT" << endl;
 		p->parent = n;
@@ -108,14 +109,29 @@ void fix_imbalance(AVLNode *n, string choice){
 		p->left = n->right;
 		p->height--;
 
-		if(g->right == p){
-			cout << "----GO	RIGHT!-------" << endl;
+		/*if(g->right == p){
 			g->right = n;
 		}
 		else{
-			cout << "WE ARE GOING LEFT I REPEAT GOING LEFT" << endl;
 			g->left = n;
+		}*/
+
+
+		if(g->height != 0){
+			cout << "g->right->key = " << g->right->key << endl;
+			cout << "g->left->key = " << g->left->key << endl;
+			if(g->right->key == p->key){
+				cout << "	g->right == n" << endl;
+				g->right = n;
+			}
+			else
+				g->left = n;
 		}
+		else{
+			cout << "g is the sentinel" << endl;
+			g->right = n;
+		}
+
 		n->parent = g;
 		n->right = p;
 	}
@@ -145,6 +161,7 @@ void fix_imbalance(AVLNode *n, string choice){
 		p->parent = n;
 		p->right = n->left;
 		
+		//what if the parent isn't the root
 		if(g->height != 0){
 			cout << "g->right->key = " << g->right->key << endl;
 			cout << "g->left->key = " << g->left->key << endl;
@@ -156,14 +173,20 @@ void fix_imbalance(AVLNode *n, string choice){
 			else
 				g->left = n;
 		}
-		else	//SENTINEL
+		//the parent is the root/g is the sentinel
+		else{
+			//cout << "g->right = " << g->right->key << endl;
 			g->right = n;
-
+			//cout << "now g->right = " << g->right->key << endl;
+		}
 	
 		n->parent = g;
 		n->left = p;
 		p->height--;
 
+		cout << n->key << " is n" << endl;
+		cout << n->left->key << endl;
+		cout << n->left->parent->key << endl;
 	}
 
 	//zig zag left right
@@ -213,6 +236,16 @@ void fix_imbalance(AVLNode *n, string choice){
 
 		p->height--;
 	}
+
+	cout << "\nThese are the most update n, p, g" << endl;
+	cout << n->key << " = n" << endl;
+	if(n->parent->height != 0){
+		cout << n->parent->key << " = p" << endl; 
+		if(n->parent->parent->height != 0)
+			cout << n->parent->parent->key << " = g" << endl;
+	}
+	//cout << "g->right->key = " << g->right->key << endl;
+	//cout << "g->left->key = " << g->left->key << endl;
 }
 
 
@@ -270,18 +303,41 @@ bool AVLTree::Insert(const string &key, void *val){
 
 	
 	//My code
-	AVLNode *prevprev = n;
-	int counter = 1;
+	AVLNode *prev = n;
 	n = n->parent;	//REMEMBER WE START AT THE PARENT OF THE NEW NODE
 	
 	while(n != sentinel){	//Goes all the way to the top
+		cout << "----------Now checking node " << n->key << "--------------" << endl;
 		if(imbalance(n)){
 			cout << "	NODE " << n->key << " = " << n->height << endl;
 			cout << "	RIGHT " << n->right->key << " = " << n->right->height << endl;
 			cout << "	LEFT " << n->left->key << " = " << n->left->height << endl;
 			cout << "	PARENT " << n->parent->key << " = " << n->parent->height << endl;
-			cout << "	prevprev " << prevprev->key << " = " << prevprev->height << endl;
+		
+			if(n->parent->height != 0){
+				if(n->key != n->parent->left->key && n->key != n->parent->right->key){
+					cout << "\n\ni hate my code - why is the parent set wrong?" << endl;
+					cout << "parent left	" << n->parent->left->key << endl;
+					cout << "parent right	" << n->parent->right->key << endl;
 
+					if(n->key < n->parent->key){
+						cout << "LEFT PARENT" << endl;
+						n->parent = n->parent->left;
+					}
+					else{
+						cout << "RIGHT PARENT" << endl;
+						n->parent = n->parent->right;
+					}
+				}
+				cout << "Parent?	" << n->parent->key << endl;
+				cout << "Parent right child		" << n->parent->right->key << endl;
+				cout << "Parent left child		" << n->parent->left->key << endl;
+			
+				cout << "\nnode	" << n->key << endl;
+				cout << "node parent" << n->parent->key << endl;
+			}
+			
+		
 			//prevprev->key doesn't always work
 			if(n->height == n->left->height && (n->height - n->left->right->height == 1)){
 				cout << "zigzag_lr" << endl;
@@ -304,18 +360,28 @@ bool AVLTree::Insert(const string &key, void *val){
 				else
 					fix_imbalance(n->left, "zigzig_l");
 			}
+			else if(n->height == n->right->height && n->key < n->right->key){
+				cout << "zig zig left if it clearly looks like right" << endl;
+				fix_imbalance(n->right, "zigzig_l");
+			}
 			else if(n->key < sentinel->right->key){
-				cout << "also zigzig_l" << endl;
-				if(n->left->height == 0)
-					fix_imbalance(n->right, "zigzig_l");
-				else
-					fix_imbalance(n->left, "zigzig_l");
+				if(n->left->left->height != 0){
+					cout << "wow it's actually zig zig right" << endl;
+					fix_imbalance(n->left, "zigzig_r");
+				}
+				else{
+					cout << "ALSO zigzig_l" << endl;
+					if(n->left->height == 0)
+						fix_imbalance(n->right, "zigzig_l");
+					else
+						fix_imbalance(n->left, "zigzig_l");
+				}
 			}
 
 			//Just let else be right so less brainpower
 			else{
 				cout << "zigzig_r" << endl;
-				if(n->right->height == 0){
+				if(n->right->height == 0 || n->height == n->left->height){
 					cout << "no choice but to do n->left" << endl;
 					fix_imbalance(n->left, "zigzig_r");
 				}
@@ -323,7 +389,7 @@ bool AVLTree::Insert(const string &key, void *val){
 					fix_imbalance(n->right, "zigzig_r");
 			}
 			
-			fix_height(prevprev);
+			fix_height(prev);
 			break;
 		}
 		else{
@@ -337,10 +403,10 @@ bool AVLTree::Insert(const string &key, void *val){
 				if(n->height > n->left->height || n->height > n->right->height)
 					break;
 			}
-			if(counter % 2 == 0)
-				prevprev = n;
-			n = n->parent;
 		}
+		cout << "loop AGAIN, bottom of insert loop" << endl;
+		prev = n;
+		n = n->parent;
 	}
 	cout << endl << endl;
 	return true;
