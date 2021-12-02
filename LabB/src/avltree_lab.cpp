@@ -39,10 +39,10 @@ void rotate_left(AVLNode *x){
 	AVLNode *T2 = y->left;	//parent's other child
 	AVLNode *gg = x->parent;//great grandparent? - could be sentinel
 
-	cout << "x = " << x->key << endl;
-	cout << "y = " << y->key << endl;
-	cout << "T2 = " << T2->key << endl;
-	cout << "gg = " << gg->key << endl;
+//	cout << "x = " << x->key << endl;
+//	cout << "y = " << y->key << endl;
+//	cout << "T2 = " << T2->key << endl;
+//	cout << "gg = " << gg->key << endl;
 
 
 	//Perform rotation
@@ -53,13 +53,13 @@ void rotate_left(AVLNode *x){
 	x->height--;
 
 	y->parent = gg;
-	if(gg->height != 0){
-		cout << "gg->right->key = " << gg->right->key << endl;
-		cout << "gg->left->key = " << gg->left->key << endl;
-		cout << "x-key	" << x->key << endl;
-	}
+//	if(gg->height != 0){
+//		cout << "gg->right->key = " << gg->right->key << endl;
+//		cout << "gg->left->key = " << gg->left->key << endl;
+//		cout << "x-key	" << x->key << endl;
+//	}
 	if(gg->right->key == x->key || gg->height == 0){
-		cout << "gg go right	Y" << endl;
+//		cout << "gg go right	Y" << endl;
 		gg->right = y;
 	}
 	else{
@@ -68,13 +68,13 @@ void rotate_left(AVLNode *x){
 
 
 
-	cout << "\nThese are the most update n, p, g" << endl;
-	cout << y->key << " = n" << endl;
-	if(y->parent->height != 0){
-		cout << y->parent->key << " = p" << endl; 
-		if(y->parent->parent->height != 0)
-			cout << y->parent->parent->key << " = g" << endl;
-	}
+//	cout << "\nThese are the most update n, p, g" << endl;
+//	cout << y->key << " = n" << endl;
+//	if(y->parent->height != 0){
+//		cout << y->parent->key << " = p" << endl; 
+		//if(y->parent->parent->height != 0)
+//			cout << y->parent->parent->key << " = g" << endl;
+//	}
 	//return y;
 }
 
@@ -84,10 +84,10 @@ void rotate_right(AVLNode *y){
 	AVLNode *T2 = x->right;		//parent's other child
 	AVLNode *gg = y->parent;	//great grandparent? - could be sentinel
 
-	cout << "y = " << y->key << endl;
-	cout << "x = " << x->key << endl;
-	cout << "T2 = " << T2->key << endl;
-	cout << "gg = " << gg->key << endl;
+//	cout << "y = " << y->key << endl;
+//	cout << "x = " << x->key << endl;
+//	cout << "T2 = " << T2->key << endl;
+//	cout << "gg = " << gg->key << endl;
 
 	//Perform rotation
 	x->right = y;
@@ -97,27 +97,27 @@ void rotate_right(AVLNode *y){
 	y->height--;
 
 	x->parent = gg;
-	if(gg->height != 0){
-		cout << "gg->right->key = " << gg->right->key << endl;
-		cout << "gg->left->key = " << gg->left->key << endl;
-		cout << "y-key	" << y->key << endl;
-	}
+//	if(gg->height != 0){
+//		cout << "gg->right->key = " << gg->right->key << endl;
+//		cout << "gg->left->key = " << gg->left->key << endl;
+//		cout << "y-key	" << y->key << endl;
+//	}
 	
 	if(gg->right->key == y->key || gg->height == 0){
-		cout << "gg go right	X" << endl;
+//		cout << "gg go right	X" << endl;
 		gg->right = x;
 	}
 	else{
 		gg->left = x;
 	}
 
-	cout << "\nThese are the most update n, p, g" << endl;
-	cout << x->key << " = n" << endl;
-	if(x->parent->height != 0){
-		cout << x->parent->key << " = p" << endl;
-		if(x->parent->parent->height != 0)
-			cout << x->parent->parent->key << " = g" << endl;
-	}
+//	cout << "\nThese are the most update n, p, g" << endl;
+//	cout << x->key << " = n" << endl;
+	//if(x->parent->height != 0){
+//		cout << x->parent->key << " = p" << endl;
+	//	if(x->parent->parent->height != 0)
+//			cout << x->parent->parent->key << " = g" << endl;
+	//}
 	//return x;
 }
 
@@ -139,14 +139,14 @@ void fix_height(AVLNode *n){
 		
 			while(n->height <= n->left->height || n->height <= n->right->height){
 				n->height++;
-				cout << "after imbalance NOW, " << n->key << " height = " << n->height << endl;
+//				cout << "after imbalance NOW, " << n->key << " height = " << n->height << endl;
 				if(n->height > n->left->height || n->height > n->right->height)
 					break;
 			}
 		}
 		n = n->parent;
 	}
-	cout << "no more fixing height" << endl;
+//	cout << "no more fixing height" << endl;
 }
 
 
@@ -163,12 +163,12 @@ void fix_imbalance(AVLNode *n, AVLNode *new_node){
 	if(diff > 1){
 		//left left
 		if(new_node->key < n->left->key){
-			cout << "zig zig right" << endl;
+//			cout << "zig zig right" << endl;
 			rotate_right(n);
 		}
 		//left right
 		else{
-			cout << "zig zag left right" << endl;
+//			cout << "zig zag left right" << endl;
 			rotate_left(n->left);
 			rotate_right(n);
 		}
@@ -176,12 +176,12 @@ void fix_imbalance(AVLNode *n, AVLNode *new_node){
 	else if(diff < -1){
 		//right right
 		if(new_node->key > n->right->key){
-			cout << "zig zig left" << endl;
+//			cout << "zig zig left" << endl;
 			rotate_left(n);
 			//right left
 		}
 		else{
-			cout << "zig zag right left" << endl;
+//			cout << "zig zag right left" << endl;
 			rotate_right(n->right);
 			rotate_left(n);
 		}
@@ -230,10 +230,10 @@ bool AVLTree::Insert(const string &key, void *val){
 	//Go up the tree and check heights and imbalances
 	while(n != sentinel){
 		if(imbalance(n)){
-			cout << "	NODE " << n->key << " = " << n->height << endl;
-			cout << "	RIGHT " << n->right->key << " = " << n->right->height << endl;
-			cout << "	LEFT " << n->left->key << " = " << n->left->height << endl;
-			cout << "	PARENT " << n->parent->key << " = " << n->parent->height << endl;
+//			cout << "	NODE " << n->key << " = " << n->height << endl;
+//			cout << "	RIGHT " << n->right->key << " = " << n->right->height << endl;
+//			cout << "	LEFT " << n->left->key << " = " << n->left->height << endl;
+//			cout << "	PARENT " << n->parent->key << " = " << n->parent->height << endl;
 
 
 			fix_imbalance(n, orig);
@@ -250,7 +250,7 @@ bool AVLTree::Insert(const string &key, void *val){
 		else{
 			if(n->height <= n->left->height || n->height <= n->right->height){
 				n->height++;
-				cout << "NO IMBALANCE - now " << n->key << " height = " << n->height << endl;
+//				cout << "NO IMBALANCE - now " << n->key << " height = " << n->height << endl;
 			}
 		}
 		prev = n;
@@ -268,13 +268,17 @@ bool AVLTree::Delete(const string &key){
 	string tmpkey;
 	void *tmpval;
 
+	//Try to find key, return false if it's not there
 	n = sentinel->right;
 	while (n != sentinel && key != n->key) {
 		n = (key < n->key) ? n->left : n->right;
 	}
 	if (n == sentinel) return false;
+
+	
 	parent = n->parent;
 
+	//1. I have no left child.  Replace me with my right child.
 	if (n->left == sentinel) {
 		if (n == parent->left) {
 			parent->left = n->right;
@@ -287,6 +291,7 @@ bool AVLTree::Delete(const string &key){
 		size--;
 
 	} 
+	//2. I have no right child.  Replace me with my left child.
 	else if (n->right == sentinel) {
 		if (n == parent->left) {
 			parent->left = n->left;
@@ -298,6 +303,10 @@ bool AVLTree::Delete(const string &key){
 		delete n;
 		size--;
 	} 
+	/*3. If I have two children, then find the node "before" me in the tree.
+			That node will have no right child, so I can recursively delete it.
+			When I'm done, I'll replace the key and val of n with the key and
+			val of the deleted node.*/
 	else {
 		for (mlc = n->left; mlc->right != sentinel; mlc = mlc->right) ;
 		tmpkey = mlc->key;
@@ -307,6 +316,84 @@ bool AVLTree::Delete(const string &key){
 		n->val = tmpval;
 		return true;
 	}
+
+
+
+	
+
+	cout << "n = " << n->key << endl;
+	int diff;
+	int diff_L;
+	int diff_R;
+	
+	//trying to figure out where nodes are and to use n or parent?
+	cout << sentinel->right->key << endl;
+	cout << sentinel->right->left->key << endl;
+
+	/*
+	while(n != sentinel){
+		if(n->left == NULL)
+			diff = n->right->height * -1;
+		else if(n->right == NULL)
+			diff = n->left->height;
+		else
+			diff = n->left->height - n->right->height;
+
+		cout << "diff = " << diff << endl;
+		
+
+		if(diff < -1 || diff > 1){
+			if(n->left == NULL){
+				cout << "no left child" << endl;
+				diff_L = 0;
+			}
+			else
+				diff_L = n->left->left->height - n->left->right->height;
+			
+			if(n->right == NULL){
+				cout << "no right child" << endl;
+				diff_R = 0;
+			}
+			else
+				diff_R = n->right->left->height - n->right->right->height;
+
+
+
+			if(diff == 2){
+				if(diff_L >= 0){
+					cout << "zig zig left" << endl;
+					rotate_right(n);
+				}
+				else{
+					cout << "zig zag left right" << endl;
+					rotate_left(n->left);
+					rotate_right(n);
+				}
+			}
+			else if(diff == -2){
+				if(diff_R <= 0){
+					cout << "zig zig right" << endl;
+					rotate_left(n);
+				}
+				else{
+					cout << "zig zag right left" << endl;
+					rotate_right(n->right);
+					rotate_left(n);
+				}
+			}
+		}
+		else{
+			if(n->height >= n->left->height || n->height >= n->right->height){
+				n->height--;
+				cout << n->key << "	height is now " << n->height << endl;
+			}
+		}
+		n = n->parent;
+	}
+	*/
+
+
+
 	return true;
 }
 
