@@ -1,8 +1,3 @@
-/* Name: Sarah Huang
- * Date: 
- * Program:
- * Purpose:
- */
 #include <vector>
 #include <string>
 #include <iostream>
@@ -15,247 +10,8 @@ using CS202::AVLTree;
 using CS202::AVLNode;
 
 
-
-//Check whether there is an imbalance around a single node (by checking heights of children)
-bool imbalance(const AVLNode *n){
-	(void) n;
-	
-	int diff = n->left->height - n->right->height;
-	cout << "IMBALANCE CHECK: " << n->left->height << " - " << n->right->height << " = " << diff << endl;
-	if(diff < -1 || diff > 1){
-		cout << "YES imbalance" << endl;
-		return true;
-	}
-	else{
-		return false;
-	}
-}
-
-
-void fix_height(AVLNode *n){
-	cout << "\nfix_height START" << endl;
-	
-	while(n->key != "---SENTINEL---"){
-		if(n->left != NULL || n->right != NULL){	//Has at least a child
-			int diff = n->left->height - n->right->height;
-			cout << "	" << n->left->height << " - " << n->right->height << " = " << diff << endl;
-
-			//Increases the heights of the children until the difference is 0 or 1
-			while(diff < -1 || diff > 1){
-				if(diff < -1){
-					cout << "diff < -1" << endl;
-					n->left->height++;
-					cout << n->left->key << " = " << n->left->height << endl;
-				}
-				else if(diff > 1){
-					cout << "diff > 1" << endl;
-					n->right->height++;
-					cout << n->right->key << " = " << n->right->height << endl;
-				}
-				diff = n->left->height - n->right->height;
-			}
-
-			//Increases the node's height until it is greater than the children by 1
-			while(n->height <= n->left->height || n->height <= n->right->height){
-				n->height++;
-				cout << "now " << n->key << " height = " << n->height << endl;
-
-			    if(n->height > n->left->height || n->height > n->right->height)		
-					break;
-			}
-		}
-		cout << "NEW HEIGHT	KEY " <<  n->key << ":	" << n->height << endl;
-		n = n->parent;
-	}
-	cout << "fix_height END" << endl;
-}
-
-
-void fix_imbalance(AVLNode *n, string choice){
-	cout << "\nFiX ImBaLaNcE" << endl;
-	//AVLNode *n = node itself
-	AVLNode *p = n->parent;
-	AVLNode *g = p->parent;
-
-	cout << "n = " << n->key << endl;
-	cout << "p = " << p->key << endl;
-	cout << "g = " << g->key << endl;
-	
-
-	//zig zig left
-	if(choice == "zigzig_l"){
-		/*cout << g->left->key << endl;
-		cout << g->left->right->key << endl;
-		cout << g->left->right->right->key << endl;
-		cout << g->left->right->right->right->key << endl;
-		*/
-
-		cout << "\nzig zig LEFT" << endl;
-		p->parent = n;
-		p->right = n->left;
-		p->height--;
-
-		if(g->right == p)
-			g->right = n;
-		else
-			g->left = n;
-		n->parent = g;
-		n->left = p;
-	}	
-	//zig zig right
-	if(choice == "zigzig_r"){
-		cout << "\nzig zig RIGHT" << endl;
-		p->parent = n;
-		p->left = n->right;
-		p->height--;
-
-		/*if(g->right == p){
-			g->right = n;
-		}
-		else{
-			g->left = n;
-		}*/
-
-
-		if(g->height != 0){
-			cout << "g->right->key = " << g->right->key << endl;
-			cout << "g->left->key = " << g->left->key << endl;
-			if(g->right->key == p->key){
-				cout << "	g->right == n" << endl;
-				g->right = n;
-			}
-			else
-				g->left = n;
-		}
-		else{
-			cout << "g is the sentinel" << endl;
-			g->right = n;
-		}
-
-		n->parent = g;
-		n->right = p;
-	}
-
-
-	//zig zag right left
-	else if(choice == "zigzag_rl"){
-		cout << "\nzig ZAG right left" << endl;
-	
-		//first rotation
-		p->parent = n;
-		p->left = n->right;
-		
-		g->right = n;
-		n->parent = g;
-		n->right = p;
-
-		p->height--;
-
-		//second rotation
-		p = n->parent;
-		g = p->parent;
-		cout << n->key << " (n)  NEW " << endl;
-		cout << p->key << " (p)  NEW " << endl; 
-		cout << g->key << " (g)  NEW" << endl;  
-
-		p->parent = n;
-		p->right = n->left;
-		
-		//what if the parent isn't the root
-		if(g->height != 0){
-			cout << "g->right->key = " << g->right->key << endl;
-			cout << "g->left->key = " << g->left->key << endl;
-		
-			if(g->right->key == p->key){
-				cout << "	g->right == n" << endl;
-				g->right = n;
-			}
-			else
-				g->left = n;
-		}
-		//the parent is the root/g is the sentinel
-		else{
-			//cout << "g->right = " << g->right->key << endl;
-			g->right = n;
-			//cout << "now g->right = " << g->right->key << endl;
-		}
-	
-		n->parent = g;
-		n->left = p;
-		p->height--;
-
-		cout << n->key << " is n" << endl;
-		cout << n->left->key << endl;
-		cout << n->left->parent->key << endl;
-	}
-
-	//zig zag left right
-	if(choice == "zigzag_lr"){
-		cout << "\nzig ZAG left right" << endl;
-		
-		//first rotation
-		p->parent = n;
-		p->right = n->left;
-		
-		g->left = n;
-		n->parent = g;
-		n->left = p;
-
-		p->height--;
-
-
-		//second rotation
-		p = n->parent;
-		g = p->parent;
-		cout << n->key << " (n)  NEW " << endl;
-		cout << p->key << " (p)  NEW " << endl;	//11
-		cout << g->key << " (g)  NEW" << endl;	//5
-		
-
-		p->parent = n;
-		p->left = n->right;
-
-		if(g->height != 0){
-			cout << "g->right->key = " << g->right->key << endl;
-			cout << "g->left->key = " << g->left->key << endl;
-
-			if(g->right->key == p->key){
-				cout << "	g->right == n" << endl;
-				g->right = n;
-			}
-			else{
-				cout << "	g->left == n" << endl;
-				g->left = n;
-			}
-		}
-		else
-			g->right = n;
-
-		n->parent = g;
-		n->right = p;
-
-		p->height--;
-	}
-
-	cout << "\nThese are the most update n, p, g" << endl;
-	cout << n->key << " = n" << endl;
-	if(n->parent->height != 0){
-		cout << n->parent->key << " = p" << endl; 
-		if(n->parent->parent->height != 0)
-			cout << n->parent->parent->key << " = g" << endl;
-	}
-	//cout << "g->right->key = " << g->right->key << endl;
-	//cout << "g->left->key = " << g->left->key << endl;
-}
-
-
-
-
-
-//Assignment Operator
 AVLTree& AVLTree::operator= (const AVLTree &t){
 	(void) t;
-
 	Clear();
 	recursive_postorder_copy(t.sentinel->right);
 	return *this;
@@ -264,152 +20,172 @@ AVLTree& AVLTree::operator= (const AVLTree &t){
 
 
 
+//Chefck whether there is an imbalance around a single node (using heights of left & right children)
+bool imbalance(const AVLNode *n){
+	int left = n->left->height;
+	int right = n->right->height;
+	int diff = left - right;
 
-bool AVLTree::Insert(const string &key, void *val){
-	AVLNode *parent;
-	AVLNode *n;
+	if(diff < -1 || diff > 1)
+		return true;
+	else
+		return false;
+}
 
-	parent = sentinel;
-	n = sentinel->right;
 
-	//Find where the key should go.  If you find the key, return false.
-	while (n != sentinel) {
-		if (n->key == key) return false;
-		parent = n;
-		n = (key < n->key) ? n->left : n->right;
+void rotate_left(AVLNode *x){
+	//AVLNode *x			grandparent (n1)
+	AVLNode *y = x->right;	//parent (n2)
+	AVLNode *T2 = y->left;	//parent's other child
+	AVLNode *gg = x->parent;//great grandparent? - could be sentinel
+
+	cout << "x = " << x->key << endl;
+	cout << "y = " << y->key << endl;
+	cout << "T2 = " << T2->key << endl;
+	cout << "gg = " << gg->key << endl;
+
+
+	//Perform rotation
+	y->left = x;
+	x->parent = y;
+	x->right = T2;
+	T2->parent = x;
+	x->height--;
+
+	y->parent = gg;
+	if(gg->height != 0){
+		cout << "gg->right->key = " << gg->right->key << endl;
+		cout << "gg->left->key = " << gg->left->key << endl;
+		cout << "x-key	" << x->key << endl;
+	}
+	if(gg->right->key == x->key || gg->height == 0){
+		cout << "gg go right	Y" << endl;
+		gg->right = y;
+	}
+	else{
+		gg->left = y;
 	}
 
-	/*At this point, parent is the node that will be the parent of the new node.
-	  Create the new node, and hook it in. */
-	n = new AVLNode;
-	n->key = key;
-	n->val = val;
-	n->parent = parent;
-	n->height = 1;
-	n->left = sentinel;
-	n->right = sentinel;
 
-	// Use the correct pointer in the parent to point to the new node. 
-	if (parent == sentinel) 
-		sentinel->right = n;
-	else if (key < parent->key) 
-		parent->left = n;
-	else
-		parent->right = n;
+
+	cout << "\nThese are the most update n, p, g" << endl;
+	cout << y->key << " = n" << endl;
+	if(y->parent->height != 0){
+		cout << y->parent->key << " = p" << endl; 
+		if(y->parent->parent->height != 0)
+			cout << y->parent->parent->key << " = g" << endl;
+	}
+	//return y;
+}
+
+void rotate_right(AVLNode *y){
+	//AVLNode *y				grandparent (n1)
+	AVLNode *x = y->left;	    //parent (n2)
+	AVLNode *T2 = x->right;		//parent's other child
+	AVLNode *gg = y->parent;	//great grandparent? - could be sentinel
+
+	cout << "y = " << y->key << endl;
+	cout << "x = " << x->key << endl;
+	cout << "T2 = " << T2->key << endl;
+	cout << "gg = " << gg->key << endl;
+
+	//Perform rotation
+	x->right = y;
+	y->parent = x;
+	y->left = T2;
+	T2->parent = y;
+	y->height--;
+
+	x->parent = gg;
+	if(gg->height != 0){
+		cout << "gg->right->key = " << gg->right->key << endl;
+		cout << "gg->left->key = " << gg->left->key << endl;
+		cout << "y-key	" << y->key << endl;
+	}
 	
-	size++;
+	if(gg->right->key == y->key || gg->height == 0){
+		cout << "gg go right	X" << endl;
+		gg->right = x;
+	}
+	else{
+		gg->left = x;
+	}
+
+	cout << "\nThese are the most update n, p, g" << endl;
+	cout << x->key << " = n" << endl;
+	if(x->parent->height != 0){
+		cout << x->parent->key << " = p" << endl;
+		if(x->parent->parent->height != 0)
+			cout << x->parent->parent->key << " = g" << endl;
+	}
+	//return x;
+}
 
 
 
-	
-	//My code
-	AVLNode *prev = n;
-	n = n->parent;	//REMEMBER WE START AT THE PARENT OF THE NEW NODE
-	
-	while(n != sentinel){	//Goes all the way to the top
-		cout << "----------Now checking node " << n->key << "--------------" << endl;
-		if(imbalance(n)){
-			cout << "	NODE " << n->key << " = " << n->height << endl;
-			cout << "	RIGHT " << n->right->key << " = " << n->right->height << endl;
-			cout << "	LEFT " << n->left->key << " = " << n->left->height << endl;
-			cout << "	PARENT " << n->parent->key << " = " << n->parent->height << endl;
-		
-			if(n->parent->height != 0){
-				if(n->key != n->parent->left->key && n->key != n->parent->right->key){
-					cout << "\n\ni hate my code - why is the parent set wrong?" << endl;
-					cout << "parent left	" << n->parent->left->key << endl;
-					cout << "parent right	" << n->parent->right->key << endl;
-
-					if(n->key < n->parent->key){
-						cout << "LEFT PARENT" << endl;
-						n->parent = n->parent->left;
-					}
-					else{
-						cout << "RIGHT PARENT" << endl;
-						n->parent = n->parent->right;
-					}
-				}
-				cout << "Parent?	" << n->parent->key << endl;
-				cout << "Parent right child		" << n->parent->right->key << endl;
-				cout << "Parent left child		" << n->parent->left->key << endl;
-			
-				cout << "\nnode	" << n->key << endl;
-				cout << "node parent" << n->parent->key << endl;
-			}
-			
-		
-			//prevprev->key doesn't always work
-			if(n->height == n->left->height && (n->height - n->left->right->height == 1)){
-				cout << "zigzag_lr" << endl;
-				fix_imbalance(n->left->right, "zigzag_lr");
-			}
-			
-			else if(n->height == n->right->height && (n->height - n->right->left->height == 1)){
-				cout << "zigzag_rl" << endl;
-				fix_imbalance(n->right->left, "zigzag_rl");
-			}
-			
-			
-			//HOW CAN I DIFFERENTIATE ZIG ZIG LEFT AND RIGHT?
-			else if((n->left->height == 0 && n->right->left->height == 0)){
-				cout << "zigzig_l" << endl;
-				if(n->left->height == 0){
-					cout << "i can only do n->right" << endl;
-					fix_imbalance(n->right, "zigzig_l");
-				}
+void fix_height(AVLNode *n){
+	n = n->parent;
+	while(n->key != "---SENTINEL---"){
+		if(n->left != NULL || n->right != NULL){
+			int diff = n->left->height - n->right->height;
+			while(diff < -1 || diff > 1){
+				if(diff < -1)
+					n->left->height++;
 				else
-					fix_imbalance(n->left, "zigzig_l");
+					n->right->height++;
+				diff = n->left->height - n->right->height;
 			}
-			else if(n->height == n->right->height && n->key < n->right->key){
-				cout << "zig zig left if it clearly looks like right" << endl;
-				fix_imbalance(n->right, "zigzig_l");
-			}
-			else if(n->key < sentinel->right->key){
-				if(n->left->left->height != 0){
-					cout << "wow it's actually zig zig right" << endl;
-					fix_imbalance(n->left, "zigzig_r");
-				}
-				else{
-					cout << "ALSO zigzig_l" << endl;
-					if(n->left->height == 0)
-						fix_imbalance(n->right, "zigzig_l");
-					else
-						fix_imbalance(n->left, "zigzig_l");
-				}
-			}
-
-			//Just let else be right so less brainpower
-			else{
-				cout << "zigzig_r" << endl;
-				if(n->right->height == 0 || n->height == n->left->height){
-					cout << "no choice but to do n->left" << endl;
-					fix_imbalance(n->left, "zigzig_r");
-				}
-				else
-					fix_imbalance(n->right, "zigzig_r");
-			}
-			
-			fix_height(prev);
-			break;
-		}
-		else{
-			//Increases the height until it is greater than children by 1
-			//This code is in fix_height but this is for not imbalanced nodes
+		
+		
 			while(n->height <= n->left->height || n->height <= n->right->height){
 				n->height++;
-				cout << "NO IMBALANCE - now " << n->key << " height = " << n->height << endl;
-
-				//If it's the right height and there is only one child node (the other is always 0)
+				cout << "after imbalance NOW, " << n->key << " height = " << n->height << endl;
 				if(n->height > n->left->height || n->height > n->right->height)
 					break;
 			}
 		}
-		cout << "loop AGAIN, bottom of insert loop" << endl;
-		prev = n;
 		n = n->parent;
 	}
-	cout << endl << endl;
-	return true;
+	cout << "no more fixing height" << endl;
+}
+
+
+
+
+void fix_imbalance(AVLNode *n, AVLNode *new_node){
+	//left left		right rotation
+	//right right	left rotation
+	//left right	left rotation, right rotation
+	//right left	right rotation, left rotation
+
+	int diff = n->left->height - n->right->height;
+
+	if(diff > 1){
+		//left left
+		if(new_node->key < n->left->key){
+			cout << "zig zig right" << endl;
+			rotate_right(n);
+		}
+		//left right
+		else{
+			cout << "zig zag left right" << endl;
+			rotate_left(n->left);
+			rotate_right(n);
+		}
+	}
+	else if(diff < -1){
+		//right right
+		if(new_node->key > n->right->key){
+			cout << "zig zig left" << endl;
+			rotate_left(n);
+			//right left
+		}
+		else{
+			cout << "zig zag right left" << endl;
+			rotate_right(n->right);
+			rotate_left(n);
+		}
+	} 
 }
 
 
@@ -417,58 +193,112 @@ bool AVLTree::Insert(const string &key, void *val){
 
 
 
-bool AVLTree::Delete(const string &key)
-{
+bool AVLTree::Insert(const string &key, void *val){
+	AVLNode *parent;
+	AVLNode *n;
+	parent = sentinel;
+	n = sentinel->right;
+	while (n != sentinel) {
+		if (n->key == key) return false;
+		parent = n;
+		n = (key < n->key) ? n->left : n->right;
+	}
+	n = new AVLNode;
+	n->key = key;
+	n->val = val;
+	n->parent = parent;
+	n->height = 1;
+	n->left = sentinel;
+	n->right = sentinel;
+	if (parent == sentinel) {
+		sentinel->right = n;
+	} 
+	else if (key < parent->key) {
+		parent->left = n;
+	} 
+	else {
+		parent->right = n;
+	}
+	size++;
+
+
+	//Start with the parent since we don't need to check the newly inserted node
+	AVLNode *orig = n;
+	AVLNode *prev = n;
+	n = n->parent;
+
+	//Go up the tree and check heights and imbalances
+	while(n != sentinel){
+		if(imbalance(n)){
+			cout << "	NODE " << n->key << " = " << n->height << endl;
+			cout << "	RIGHT " << n->right->key << " = " << n->right->height << endl;
+			cout << "	LEFT " << n->left->key << " = " << n->left->height << endl;
+			cout << "	PARENT " << n->parent->key << " = " << n->parent->height << endl;
+
+
+			fix_imbalance(n, orig);
+			
+			/*cout << sentinel->right->key << endl;
+			cout << sentinel->right->right->key << endl;
+			cout << sentinel->right->right->left->key << endl;
+			cout << sentinel->right->right->right->key << endl;
+			*/
+		
+			fix_height(prev);
+			break;
+		}
+		else{
+			if(n->height <= n->left->height || n->height <= n->right->height){
+				n->height++;
+				cout << "NO IMBALANCE - now " << n->key << " height = " << n->height << endl;
+			}
+		}
+		prev = n;
+		n = n->parent;
+	}
+	return true;
+}
+
+
+
+
+
+bool AVLTree::Delete(const string &key){
 	AVLNode *n, *parent, *mlc;
 	string tmpkey;
 	void *tmpval;
 
-
-	//Try to find the key -- if you can't return false.
 	n = sentinel->right;
 	while (n != sentinel && key != n->key) {
 		n = (key < n->key) ? n->left : n->right;
 	}
 	if (n == sentinel) return false;
-
-
-	/* We go through the three cases for deletion, although it's a little
-	   different from the canonical explanation. */
 	parent = n->parent;
 
-
-
-	/* Case 1 - I have no left child.  Replace me with my right child.
-	   Note that this handles the case of having no children, too. */
 	if (n->left == sentinel) {
 		if (n == parent->left) {
 			parent->left = n->right;
-		} else {
+		} 
+		else {
 			parent->right = n->right;
 		}
 		if (n->right != sentinel) n->right->parent = parent;
 		delete n;
 		size--;
 
-
-		/* Case 2 - I have no right child.  Replace me with my left child. */
-	} else if (n->right == sentinel) {
+	} 
+	else if (n->right == sentinel) {
 		if (n == parent->left) {
 			parent->left = n->left;
-		} else {
+		} 
+		else {
 			parent->right = n->left;
 		}
 		n->left->parent = parent;
 		delete n;
 		size--;
-
-
-		/* If I have two children, then find the node "before" me in the tree.
-		   That node will have no right child, so I can recursively delete it.
-		   When I'm done, I'll replace the key and val of n with the key and
-		   val of the deleted node.  You'll note that the recursive call 
-		   updates the size, so you don't have to do it here. */
-	} else {
+	} 
+	else {
 		for (mlc = n->left; mlc->right != sentinel; mlc = mlc->right) ;
 		tmpkey = mlc->key;
 		tmpval = mlc->val;
@@ -477,13 +307,8 @@ bool AVLTree::Delete(const string &key)
 		n->val = tmpval;
 		return true;
 	}
-
 	return true;
 }
-
-
-
-
 
 
 
@@ -497,7 +322,6 @@ vector <string> AVLTree::Ordered_Keys() const{
 void AVLTree::make_key_vector(const AVLNode *n, vector<string> &v) const{
 	(void) n;
 	(void) v;
-
 	if(n == sentinel) return;
 
 	make_key_vector(n->left, v);
@@ -518,26 +342,11 @@ size_t AVLTree::Height() const{
 
 
 
-
-
-
-
-/* You need to write this to help you with the assignment overload.
-   It makes a copy of the subtree rooted by n.  That subtree is part
-   of a different tree -- the copy will be part of the tree that
-   is calling the method. */
-
-AVLNode* AVLTree::recursive_postorder_copy(const AVLNode *n) const{
+AVLNode *AVLTree::recursive_postorder_copy(const AVLNode *n) const{
 	(void) n;
 	AVLNode *temp;
 
-
-	//If it's the tree's sentinel node, height should be 0
-	if(n->height == 0){
-		//cout << "ah a sentinel node" << endl;
-		return NULL;
-	}
-
+	if(n->height == 0) return NULL;
 
 	temp = new AVLNode;
 	temp->key = n->key;
@@ -546,10 +355,6 @@ AVLNode* AVLTree::recursive_postorder_copy(const AVLNode *n) const{
 	temp->height = n->height;
 	temp->left = n->left;
 	temp->right = n->right;
-
-	//cout << "Just created a node!" << endl;
-	//cout << "KEY: " << temp->key << endl;
-
 
 	recursive_postorder_copy(n->left);
 	recursive_postorder_copy(n->right);
