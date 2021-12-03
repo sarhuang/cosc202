@@ -1,7 +1,7 @@
 /* Name: Sarah Huang
  * Date: 12/2/2021
  * Program: avltree_lab.cpp
- * Purpose: Simulate an AVL tree
+ * Purpose: Simulate an AVL tree.
  */
 
 #include <vector>
@@ -23,7 +23,6 @@ AVLTree& AVLTree::operator= (const AVLTree &t){
 	return *this;
 }
 
-
 //Check whether there is an imbalance around a single node (using heights of left & right children)
 bool imbalance(const AVLNode *n){
 	int left = n->left->height;
@@ -38,19 +37,25 @@ bool imbalance(const AVLNode *n){
 
 
 void rotate_left(AVLNode *x){
-	//AVLNode *x				grandparent (n1)
-	AVLNode *y = x->right;		//parent (n2)
+	//the newly added node is the child
+	//AVLNode *x				grandparent 
+	AVLNode *y = x->right;		//parent 
 	AVLNode *T2 = y->left;		//parent's other child
 	AVLNode *gg = x->parent;	//great grandparent? - could be sentinel
 
+	
 	//Perform rotation
 	y->left = x;
 	x->parent = y;
 	x->right = T2;
 	T2->parent = x;
-	x->height--;
+
+	//Don't decrease height if it's a leaf node
+	if(x->height > 1)
+		x->height--;
 
 	y->parent = gg;
+	//In case the great grandparent is the sentinel
 	if(gg->right->key == x->key || gg->height == 0)
 		gg->right = y;
 	else
@@ -59,8 +64,9 @@ void rotate_left(AVLNode *x){
 
 
 void rotate_right(AVLNode *y){
-	//AVLNode *y				grandparent (n1)
-	AVLNode *x = y->left;	    //parent (n2)
+	//the newly added node is the child
+	//AVLNode *y				//grandparent
+	AVLNode *x = y->left;	    //parent 
 	AVLNode *T2 = x->right;		//parent's other child
 	AVLNode *gg = y->parent;	//great grandparent? - could be sentinel
 
@@ -69,20 +75,27 @@ void rotate_right(AVLNode *y){
 	y->parent = x;
 	y->left = T2;
 	T2->parent = y;
-	y->height--;
-
+	
+	if(y->height > 1)
+		y->height--;
+	
 	x->parent = gg;
-	if(gg->right->key == y->key || gg->height == 0)
+	if(gg->right->key == y->key || gg->height == 0){
 		gg->right = x;
-	else
+	}
+	else{
 		gg->left = x;
+	}
 }
 
 
 //Readjust the node heights from parent of the new node to the root
 void fix_height(AVLNode *n){
 	n = n->parent;
+	
+	//Will loop through the tree from parent of new node to root
 	while(n->key != "---SENTINEL---"){
+		//Gets the children's heights assuming it's not a leaf node
 		if(n->left != NULL || n->right != NULL){
 			int diff = n->left->height - n->right->height;
 			while(diff < -1 || diff > 1){
@@ -93,7 +106,7 @@ void fix_height(AVLNode *n){
 				diff = n->left->height - n->right->height;
 			}
 		
-		
+			//Increase the height of the node if it's less than or equal to at least one of the children's heights
 			while(n->height <= n->left->height || n->height <= n->right->height){
 				n->height++;
 				if(n->height > n->left->height || n->height > n->right->height)
@@ -243,31 +256,46 @@ bool AVLTree::Delete(const string &key){
 		return true;
 	}
 
-
-
+	n->parent = parent->parent;
 	
-
-	cout << "n = " << n->key << endl;
+	/* An attempt was made.
 	int diff;
 	int diff_L;
 	int diff_R;
 	
-	//trying to figure out where nodes are and to use n or parent?
-	//cout << sentinel->right->key << endl;
-	//cout << sentinel->right->left->key << endl;
-
-	/*
+	
 	while(n != sentinel){
-		if(n->left == NULL)
-			diff = n->right->height * -1;
-		else if(n->right == NULL)
-			diff = n->left->height;
+		cout << "KEY: " << n->key << endl;
+		
+		n->parent = parent->parent;
+		
+		if(parent->parent->left == parent)
+			parent->parent->left = n;
 		else
-			diff = n->left->height - n->right->height;
+			parent->parent->right = n;
 
+		if(n->left == NULL){
+			n->right = parent->right;
+			parent->right->parent = n;
+			cout << n->right->key << "	height = " << n->right->height << endl;
+			diff = n->right->height * -1;
+		}
+		else if(n->right == NULL){
+			n->left = parent->left;
+			parent->left->parent = n;
+			cout << n->left->key << "	height = " << n->left->height << endl;
+			diff = n->left->height;
+		}
+		else{
+			cout << n->left->key << "	height = " << n->left->height << endl;
+			cout << n->right->key << "		height = " << n->right->height << endl;
+			diff = n->left->height - n->right->height;
+		}
 		cout << "diff = " << diff << endl;
 		
-
+		//cout << n->parent->key << endl << endl;
+		
+		
 		if(diff < -1 || diff > 1){
 			if(n->left == NULL){
 				cout << "no left child" << endl;
@@ -309,16 +337,14 @@ bool AVLTree::Delete(const string &key){
 			}
 		}
 		else{
-			if(n->height >= n->left->height || n->height >= n->right->height){
-				n->height--;
-				cout << n->key << "	height is now " << n->height << endl;
+			if(n != NULL){
+				if(n->height >= n->left->height || n->height >= n->right->height){
+					n->height--;
+				}
 			}
 		}
 		n = n->parent;
-	}
-	*/
-
-
+	}*/
 
 	return true;
 }
