@@ -1,3 +1,9 @@
+/* Name: Sarah Huang
+ * Date: 12/2/2021
+ * Program: avltree_lab.cpp
+ * Purpose: Simulate an AVL tree
+ */
+
 #include <vector>
 #include <string>
 #include <iostream>
@@ -9,7 +15,7 @@ using namespace std;
 using CS202::AVLTree;
 using CS202::AVLNode;
 
-
+//Assignment overload
 AVLTree& AVLTree::operator= (const AVLTree &t){
 	(void) t;
 	Clear();
@@ -18,9 +24,7 @@ AVLTree& AVLTree::operator= (const AVLTree &t){
 }
 
 
-
-
-//Chefck whether there is an imbalance around a single node (using heights of left & right children)
+//Check whether there is an imbalance around a single node (using heights of left & right children)
 bool imbalance(const AVLNode *n){
 	int left = n->left->height;
 	int right = n->right->height;
@@ -34,16 +38,10 @@ bool imbalance(const AVLNode *n){
 
 
 void rotate_left(AVLNode *x){
-	//AVLNode *x			grandparent (n1)
-	AVLNode *y = x->right;	//parent (n2)
-	AVLNode *T2 = y->left;	//parent's other child
-	AVLNode *gg = x->parent;//great grandparent? - could be sentinel
-
-//	cout << "x = " << x->key << endl;
-//	cout << "y = " << y->key << endl;
-//	cout << "T2 = " << T2->key << endl;
-//	cout << "gg = " << gg->key << endl;
-
+	//AVLNode *x				grandparent (n1)
+	AVLNode *y = x->right;		//parent (n2)
+	AVLNode *T2 = y->left;		//parent's other child
+	AVLNode *gg = x->parent;	//great grandparent? - could be sentinel
 
 	//Perform rotation
 	y->left = x;
@@ -53,41 +51,18 @@ void rotate_left(AVLNode *x){
 	x->height--;
 
 	y->parent = gg;
-//	if(gg->height != 0){
-//		cout << "gg->right->key = " << gg->right->key << endl;
-//		cout << "gg->left->key = " << gg->left->key << endl;
-//		cout << "x-key	" << x->key << endl;
-//	}
-	if(gg->right->key == x->key || gg->height == 0){
-//		cout << "gg go right	Y" << endl;
+	if(gg->right->key == x->key || gg->height == 0)
 		gg->right = y;
-	}
-	else{
+	else
 		gg->left = y;
-	}
-
-
-
-//	cout << "\nThese are the most update n, p, g" << endl;
-//	cout << y->key << " = n" << endl;
-//	if(y->parent->height != 0){
-//		cout << y->parent->key << " = p" << endl; 
-		//if(y->parent->parent->height != 0)
-//			cout << y->parent->parent->key << " = g" << endl;
-//	}
-	//return y;
 }
+
 
 void rotate_right(AVLNode *y){
 	//AVLNode *y				grandparent (n1)
 	AVLNode *x = y->left;	    //parent (n2)
 	AVLNode *T2 = x->right;		//parent's other child
 	AVLNode *gg = y->parent;	//great grandparent? - could be sentinel
-
-//	cout << "y = " << y->key << endl;
-//	cout << "x = " << x->key << endl;
-//	cout << "T2 = " << T2->key << endl;
-//	cout << "gg = " << gg->key << endl;
 
 	//Perform rotation
 	x->right = y;
@@ -97,32 +72,14 @@ void rotate_right(AVLNode *y){
 	y->height--;
 
 	x->parent = gg;
-//	if(gg->height != 0){
-//		cout << "gg->right->key = " << gg->right->key << endl;
-//		cout << "gg->left->key = " << gg->left->key << endl;
-//		cout << "y-key	" << y->key << endl;
-//	}
-	
-	if(gg->right->key == y->key || gg->height == 0){
-//		cout << "gg go right	X" << endl;
+	if(gg->right->key == y->key || gg->height == 0)
 		gg->right = x;
-	}
-	else{
+	else
 		gg->left = x;
-	}
-
-//	cout << "\nThese are the most update n, p, g" << endl;
-//	cout << x->key << " = n" << endl;
-	//if(x->parent->height != 0){
-//		cout << x->parent->key << " = p" << endl;
-	//	if(x->parent->parent->height != 0)
-//			cout << x->parent->parent->key << " = g" << endl;
-	//}
-	//return x;
 }
 
 
-
+//Readjust the node heights from parent of the new node to the root
 void fix_height(AVLNode *n){
 	n = n->parent;
 	while(n->key != "---SENTINEL---"){
@@ -139,57 +96,42 @@ void fix_height(AVLNode *n){
 		
 			while(n->height <= n->left->height || n->height <= n->right->height){
 				n->height++;
-//				cout << "after imbalance NOW, " << n->key << " height = " << n->height << endl;
 				if(n->height > n->left->height || n->height > n->right->height)
 					break;
 			}
 		}
 		n = n->parent;
 	}
-//	cout << "no more fixing height" << endl;
 }
 
 
-
-
+//Decide which rotation to do: zig zig left/right and zig zag left/right
 void fix_imbalance(AVLNode *n, AVLNode *new_node){
-	//left left		right rotation
-	//right right	left rotation
-	//left right	left rotation, right rotation
-	//right left	right rotation, left rotation
-
 	int diff = n->left->height - n->right->height;
 
 	if(diff > 1){
-		//left left
+		//zig zig right
 		if(new_node->key < n->left->key){
-//			cout << "zig zig right" << endl;
 			rotate_right(n);
 		}
-		//left right
+		//zig zag left right
 		else{
-//			cout << "zig zag left right" << endl;
 			rotate_left(n->left);
 			rotate_right(n);
 		}
 	}
 	else if(diff < -1){
-		//right right
+		//zig zig left
 		if(new_node->key > n->right->key){
-//			cout << "zig zig left" << endl;
 			rotate_left(n);
-			//right left
 		}
+		//zig zag right left
 		else{
-//			cout << "zig zag right left" << endl;
 			rotate_right(n->right);
 			rotate_left(n);
 		}
 	} 
 }
-
-
-
 
 
 
@@ -230,27 +172,13 @@ bool AVLTree::Insert(const string &key, void *val){
 	//Go up the tree and check heights and imbalances
 	while(n != sentinel){
 		if(imbalance(n)){
-//			cout << "	NODE " << n->key << " = " << n->height << endl;
-//			cout << "	RIGHT " << n->right->key << " = " << n->right->height << endl;
-//			cout << "	LEFT " << n->left->key << " = " << n->left->height << endl;
-//			cout << "	PARENT " << n->parent->key << " = " << n->parent->height << endl;
-
-
 			fix_imbalance(n, orig);
-			
-			/*cout << sentinel->right->key << endl;
-			cout << sentinel->right->right->key << endl;
-			cout << sentinel->right->right->left->key << endl;
-			cout << sentinel->right->right->right->key << endl;
-			*/
-		
 			fix_height(prev);
 			break;
 		}
 		else{
 			if(n->height <= n->left->height || n->height <= n->right->height){
 				n->height++;
-//				cout << "NO IMBALANCE - now " << n->key << " height = " << n->height << endl;
 			}
 		}
 		prev = n;
@@ -258,8 +186,6 @@ bool AVLTree::Insert(const string &key, void *val){
 	}
 	return true;
 }
-
-
 
 
 
@@ -327,8 +253,8 @@ bool AVLTree::Delete(const string &key){
 	int diff_R;
 	
 	//trying to figure out where nodes are and to use n or parent?
-	cout << sentinel->right->key << endl;
-	cout << sentinel->right->left->key << endl;
+	//cout << sentinel->right->key << endl;
+	//cout << sentinel->right->left->key << endl;
 
 	/*
 	while(n != sentinel){
@@ -398,14 +324,15 @@ bool AVLTree::Delete(const string &key){
 }
 
 
-
-
+//Return a vector of sorted keys
 vector <string> AVLTree::Ordered_Keys() const{
 	vector <string> rv;
 	make_key_vector(sentinel->right, rv);
 	return rv;
 }
 
+
+//Helper for Ordered_Keys()
 void AVLTree::make_key_vector(const AVLNode *n, vector<string> &v) const{
 	(void) n;
 	(void) v;
@@ -416,10 +343,7 @@ void AVLTree::make_key_vector(const AVLNode *n, vector<string> &v) const{
 	make_key_vector(n->right, v);
 }
 
-
-
-
-
+//Returns the height of the tree
 size_t AVLTree::Height() const{
 	AVLNode *n;
 	n = sentinel->right;
@@ -427,8 +351,7 @@ size_t AVLTree::Height() const{
 }
 
 
-
-
+//Helper for the assignment overload
 AVLNode *AVLTree::recursive_postorder_copy(const AVLNode *n) const{
 	(void) n;
 	AVLNode *temp;
